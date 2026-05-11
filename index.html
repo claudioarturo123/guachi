@@ -705,6 +705,7 @@
     height: auto;
     border-radius: 12px;
     background: black;
+    object-fit: cover;
   }
 
   #canvas {
@@ -912,7 +913,7 @@
     <button class="btn-close-camera" onclick="closeCamera()">✕</button>
   </div>
   <div class="camera-content">
-    <video id="video" playsinline></video>
+    <video id="video" playsinline autoplay muted></video>
     <canvas id="canvas"></canvas>
     <div class="camera-buttons">
       <button class="btn-camera-action" onclick="capturePhoto()">📸 Capturar</button>
@@ -929,6 +930,7 @@
 </footer>
 
 <script>
+  console.log('mediaDevices:', navigator.mediaDevices);
   let visits = [];
   let uniqueVisitors = [];
   let deleteId = null;
@@ -1088,15 +1090,53 @@
   async function openCamera() {
     const modal = document.getElementById('camera-modal');
     const video = document.getElementById('video');
+    const status = document.getElementById('camera-status');
+
     modal.classList.add('active');
 
     try {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+        videoStream = null;
+      }
+
+      video.srcObject = null;
+
       videoStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
       });
+
+      video.setAttribute('playsinline', true);
+      video.setAttribute('autoplay', true);
+      video.setAttribute('muted', true);
+
       video.srcObject = videoStream;
+
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          resolve();
+        };
+      });
+
+      await video.play();
+
+      status.textContent = 'Apunta a la matrícula del vehículo';
+
     } catch (err) {
-      showAlert('error', 'No se pudo acceder a la cámara');
+      console.error('Error cámara:', err);
+
+      status.textContent = 'Error al acceder a la cámara';
+
+      showAlert(
+        'error',
+        'No se pudo acceder a la cámara. Verifica permisos del navegador.'
+      );
+
       closeCamera();
     }
   }
@@ -1104,13 +1144,23 @@
   function closeCamera() {
     const modal = document.getElementById('camera-modal');
     const video = document.getElementById('video');
-    
-    if (videoStream) {
-      videoStream.getTracks().forEach(track => track.stop());
-      videoStream = null;
+
+    try {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => {
+          track.stop();
+        });
+      }
+    } catch (e) {
+      console.error(e);
     }
-    
+
+    video.pause();
     video.srcObject = null;
+    video.load();
+
+    videoStream = null;
+
     modal.classList.remove('active');
   }
 
