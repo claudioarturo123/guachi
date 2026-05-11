@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#0f172a">
 <title>Centro de Distribución - Registro de Visitas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist:wght@400;500&display=swap');
 
@@ -225,6 +226,47 @@
     border-color: var(--danger);
   }
 
+  .input-group {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .input-group input {
+    flex: 1;
+  }
+
+  .btn-camera {
+    height: 44px;
+    padding: 0 16px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .btn-camera:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  }
+
+  .btn-camera:active {
+    transform: scale(0.96);
+  }
+
+  .btn-camera.loading {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
   /* AUTOCOMPLETE */
   .autocomplete-wrapper {
     position: relative;
@@ -329,6 +371,13 @@
     color: var(--danger);
     display: flex;
     border: 1px solid rgba(220, 38, 38, 0.2);
+  }
+
+  .alert.info {
+    background: rgba(234, 88, 12, 0.08);
+    color: var(--accent);
+    display: flex;
+    border: 1px solid rgba(234, 88, 12, 0.2);
   }
 
   /* STATS */
@@ -595,6 +644,104 @@
     transform: scale(0.96);
   }
 
+  /* CAMERA MODAL */
+  .camera-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--primary);
+    z-index: 300;
+    flex-direction: column;
+  }
+
+  .camera-modal.active {
+    display: flex;
+  }
+
+  .camera-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--primary);
+    color: white;
+  }
+
+  .camera-header-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .btn-close-camera {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .camera-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  #video {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 12px;
+    background: black;
+  }
+
+  #canvas {
+    display: none;
+  }
+
+  .camera-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-camera-action {
+    height: 48px;
+    padding: 0 24px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .btn-camera-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  }
+
+  .camera-status {
+    color: white;
+    text-align: center;
+    font-size: 13px;
+  }
+
   /* FOOTER */
   footer {
     background: var(--primary);
@@ -622,6 +769,8 @@
     .item { grid-template-columns: 1fr; }
     .item-time { align-items: flex-start; }
     .header-subtitle { display: none; }
+    .input-group { flex-direction: column; }
+    .input-group .btn-camera { width: 100%; }
   }
 
   /* SCROLLBAR */
@@ -669,9 +818,14 @@
     </div>
 
     <div class="form-grid">
-      <div class="form-group autocomplete-wrapper">
+      <div class="form-group autocomplete-wrapper full">
         <label for="patente">Patente</label>
-        <input type="text" id="patente" placeholder="Ej: XX-XX-00" autocomplete="off">
+        <div class="input-group">
+          <input type="text" id="patente" placeholder="Ej: XX-XX-00" autocomplete="off">
+          <button class="btn-camera" onclick="openCamera()" title="Escanear matrícula">
+            📷 Escanear
+          </button>
+        </div>
         <div class="autocomplete-dropdown" id="dropdown"></div>
       </div>
 
@@ -739,6 +893,7 @@
 
 </main>
 
+<!-- MODAL ELIMINAR -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-title">¿Eliminar este registro?</div>
@@ -750,10 +905,26 @@
   </div>
 </div>
 
+<!-- MODAL CÁMARA -->
+<div class="camera-modal" id="camera-modal">
+  <div class="camera-header">
+    <div class="camera-header-title">Escanear matrícula</div>
+    <button class="btn-close-camera" onclick="closeCamera()">✕</button>
+  </div>
+  <div class="camera-content">
+    <video id="video" playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div class="camera-buttons">
+      <button class="btn-camera-action" onclick="capturePhoto()">📸 Capturar</button>
+    </div>
+    <div class="camera-status" id="camera-status">Apunta a la matrícula del vehículo</div>
+  </div>
+</div>
+
 <footer>
   <div class="footer-content">
     <div class="footer-line">© 2024 Centro de Distribución. Todos los derechos reservados.</div>
-    <div class="footer-line">Sistema de registro de visitas vehiculares | v1.0</div>
+    <div class="footer-line">Sistema de registro de visitas vehiculares con escáner | v2.0</div>
   </div>
 </footer>
 
@@ -761,6 +932,7 @@
   let visits = [];
   let uniqueVisitors = [];
   let deleteId = null;
+  let videoStream = null;
 
   function loadData() {
     const stored = localStorage.getItem('cd-visits');
@@ -911,6 +1083,85 @@
   document.addEventListener('click', e => {
     if (!e.target.closest('.autocomplete-wrapper')) closeDropdown();
   });
+
+  /* CAMERA FUNCTIONS */
+  async function openCamera() {
+    const modal = document.getElementById('camera-modal');
+    const video = document.getElementById('video');
+    modal.classList.add('active');
+
+    try {
+      videoStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
+      });
+      video.srcObject = videoStream;
+    } catch (err) {
+      showAlert('error', 'No se pudo acceder a la cámara');
+      closeCamera();
+    }
+  }
+
+  function closeCamera() {
+    const modal = document.getElementById('camera-modal');
+    const video = document.getElementById('video');
+    
+    if (videoStream) {
+      videoStream.getTracks().forEach(track => track.stop());
+      videoStream = null;
+    }
+    
+    video.srcObject = null;
+    modal.classList.remove('active');
+  }
+
+  async function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    const status = document.getElementById('camera-status');
+    status.textContent = 'Procesando imagen...';
+
+    try {
+      const result = await Tesseract.recognize(canvas, 'spa');
+      const text = result.data.text.toUpperCase().trim();
+      
+      const plate = extractPlate(text);
+
+      if (plate) {
+        document.getElementById('patente').value = plate;
+        showAlert('success', `✓ Matrícula detectada: ${plate}`);
+        closeCamera();
+      } else {
+        status.textContent = 'No se detectó matrícula. Intenta de nuevo.';
+      }
+    } catch (err) {
+      console.error('Error en OCR:', err);
+      status.textContent = 'Error al procesar la imagen.';
+    }
+  }
+
+  function extractPlate(text) {
+    const patterns = [
+      /[A-Z]{2}-?\d{2}-?\d{2}/g,
+      /[A-Z]{2}-?\d{3}-?\d{2}/g,
+      /\b[A-Z]{2}\d{2}[A-Z]{2}\b/g,
+      /\d{2}[A-Z]{2}\d{4}/g
+    ];
+
+    for (const pattern of patterns) {
+      const matches = text.match(pattern);
+      if (matches) {
+        return matches[0].replace(/-/g, '-').toUpperCase();
+      }
+    }
+
+    return null;
+  }
 
   function updateStats() {
     const today = new Date().toISOString().split('T')[0];
