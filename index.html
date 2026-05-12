@@ -315,22 +315,6 @@
     outline: none;
   }
 
-  select {
-    cursor: pointer;
-    padding-right: 32px;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b0b3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 8px center;
-    background-size: 20px;
-    padding-right: 36px;
-  }
-
-  select option {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    padding: 8px;
-  }
-
   textarea {
     height: auto;
     min-height: 60px;
@@ -992,19 +976,6 @@
         </div>
 
         <div class="form-group">
-          <label>Tipo de vehículo *</label>
-          <select id="tipo-vehiculo">
-            <option value="">- Selecciona -</option>
-            <option value="Auto">Auto</option>
-            <option value="Camión rampla">Camión rampla</option>
-            <option value="Camión 3 1/4">Camión 3 1/4</option>
-            <option value="Camioneta">Camioneta</option>
-            <option value="Furgón">Furgón</option>
-            <option value="Camión grúa">Camión grúa</option>
-          </select>
-        </div>
-
-        <div class="form-group">
           <label>Conductor *</label>
           <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
         </div>
@@ -1066,6 +1037,11 @@
     </div>
 
     <div class="timestamp" id="timestamp-registro"></div>
+
+    <!-- INDICADOR CONEXIÓN SHEETS -->
+    <div id="conexion-status" style="font-size:12px;font-weight:500;margin-bottom:12px;text-align:center;">
+      🔄 Conectando con Google Sheets...
+    </div>
 
     <!-- BARRA DE ALMACENAMIENTO -->
     <div class="storage-bar-wrap">
@@ -1224,24 +1200,6 @@
 
     <div class="card">
       <div class="card-header">
-        <div class="card-icon">🌙</div>
-        <div class="card-title">Turno Noche (20:00 - 08:00)</div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Fecha inicio (desde 20:00)</label>
-          <input type="date" id="fecha-noche-desde">
-        </div>
-        <div class="form-group">
-          <label>Fecha término (hasta 08:00)</label>
-          <input type="date" id="fecha-noche-hasta">
-        </div>
-      </div>
-
-      <button class="btn-secondary" onclick="exportPDFNight()">🌙 Exportar turno noche</button>
-    </div>
-      <div class="card-header">
         <div class="card-icon">💬</div>
         <div class="card-title">WhatsApp</div>
       </div>
@@ -1371,18 +1329,88 @@
     if (e.key === 'Enter') checkPin();
   });
 
-  // ════════════════════ DATOS ════════════════════
+  // ════════════════════ GOOGLE SHEETS API ════════════════════
+  const GS_URL = 'https://script.google.com/macros/s/AKfycbwUK1sqUbxtMG_J87oJsQSJelOUk2iGj_9mgFyjjukkMO4EoTUL_pycW0i3WsQBfanIMg/exec';
+
+  // Indicador de estado de conexión
+  function setConexionStatus(estado) {
+    // 'online' | 'offline' | 'syncing'
+    const el = document.getElementById('conexion-status');
+    if (!el) return;
+    if (estado === 'online')  { el.textContent = '🟢 Sincronizado con Google Sheets'; el.style.color = '#10a37f'; }
+    if (estado === 'offline') { el.textContent = '🔴 Sin conexión — guardado local'; el.style.color = '#f59e0b'; }
+    if (estado === 'syncing') { el.textContent = '🔄 Sincronizando...'; el.style.color = '#60a5fa'; }
+  }
+
+  // Guardar en localStorage Y enviar a Google Sheets
+  function saveData() {
+    localStorage.setItem('cd-visits', JSON.stringify(visits));
+    localStorage.setItem('cd-contacts', JSON.stringify(contacts));
+    localStorage.setItem('cd-updated', new Date().toISOString());
+  }
+
+  // Enviar una visita nueva a Sheets
+  async function pushVisitToSheets(visit) {
+    setConexionStatus('syncing');
+    try {
+      await fetch(GS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'insert', ...visit })
+      });
+      setConexionStatus('online');
+      // Marcar visita como sincronizada
+      visit._synced = true;
+      saveData();
+    } catch(e) {
+      setConexionStatus('offline');
+      visit._synced = false;
+      saveData();
+    }
+  }
+
+  // Eliminar de Sheets
+  async function deleteFromSheets(id) {
+    try {
+      await fetch(GS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: String(id) })
+      });
+    } catch(e) { /* sin conexión, igual se eliminó local */ }
+  }
+
+  // Sincronizar visitas pendientes (las que se guardaron sin internet)
+  async function syncPendientes() {
+    const pendientes = visits.filter(v => !v._synced);
+    if (!pendientes.length) return;
+    setConexionStatus('syncing');
+    for (const v of pendientes) {
+      try {
+        await fetch(GS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'insert', ...v })
+        });
+        v._synced = true;
+      } catch(e) { break; }
+    }
+    saveData();
+    const aun = visits.filter(v => !v._synced).length;
+    setConexionStatus(aun === 0 ? 'online' : 'offline');
+  }
+
+  // Cargar datos: primero desde local, luego intentar sincronizar pendientes
   function loadData() {
     const v = localStorage.getItem('cd-visits');
     const c = localStorage.getItem('cd-contacts');
     if (v) visits = JSON.parse(v);
     if (c) contacts = JSON.parse(c);
-  }
-
-  function saveData() {
-    localStorage.setItem('cd-visits', JSON.stringify(visits));
-    localStorage.setItem('cd-contacts', JSON.stringify(contacts));
-    localStorage.setItem('cd-updated', new Date().toISOString());
+    // Intentar sincronizar pendientes en segundo plano
+    setTimeout(syncPendientes, 1500);
   }
 
   function setDateTime() {
@@ -1393,13 +1421,6 @@
     const hoy = now.toISOString().split('T')[0];
     document.getElementById('fecha-desde').value = hoy;
     document.getElementById('fecha-hasta').value = hoy;
-
-    // Para turno noche: ayer a hoy
-    const ayer = new Date(now);
-    ayer.setDate(ayer.getDate() - 1);
-    const ayerStr = ayer.toISOString().split('T')[0];
-    document.getElementById('fecha-noche-desde').value = ayerStr;
-    document.getElementById('fecha-noche-hasta').value = hoy;
   }
 
   function updateTimestamp(elementId) {
@@ -1482,7 +1503,7 @@
     }
 
     dropdown.innerHTML = matches.map(v => `
-            <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.tipoVehiculo || 'Auto'}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}')">
+      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}')">
         <div class="dropdown-plate">${v.patente}</div>
         <div class="dropdown-name">${v.conductor || 'Sin nombre'}</div>
       </div>
@@ -1491,9 +1512,8 @@
     dropdown.classList.add('active');
   });
 
-  function selectVehicle(patente, tipoVehiculo, conductor, rut, destino, notas) {
+  function selectVehicle(patente, conductor, rut, destino, notas) {
     document.getElementById('patente').value = patente;
-    document.getElementById('tipo-vehiculo').value = tipoVehiculo;
     document.getElementById('conductor').value = conductor;
     document.getElementById('rut').value = rut;
     document.getElementById('destino').value = destino;
@@ -1510,12 +1530,10 @@
 
   function registerVisit() {
     const patente = document.getElementById('patente').value.trim().toUpperCase();
-    const tipoVehiculo = document.getElementById('tipo-vehiculo').value.trim();
     const conductor = document.getElementById('conductor').value.trim();
     const destino = document.getElementById('destino').value.trim();
 
     if (!patente) { showAlert('error', '⚠️ Ingresa la patente del vehículo'); return; }
-    if (!tipoVehiculo) { showAlert('error', '⚠️ Selecciona el tipo de vehículo'); return; }
     if (!conductor) { showAlert('error', '⚠️ El nombre del conductor es obligatorio'); return; }
     if (!destino) { showAlert('error', '⚠️ El destino es obligatorio'); return; }
 
@@ -1524,33 +1542,33 @@
     const horaActual = now.toTimeString().slice(0, 5);
     const fechaActual = now.toISOString().split('T')[0];
 
-    visits.push({
+    const nuevaVisita = {
       id: Date.now(),
       patente,
-      tipoVehiculo,
       conductor,
       rut: document.getElementById('rut').value.trim(),
       destino,
       fecha: fechaActual,
       hora: horaActual,
       notas: document.getElementById('notas').value.trim(),
-      usuario: DEFAULT_USER
-    });
+      usuario: DEFAULT_USER,
+      _synced: false
+    };
 
+    visits.push(nuevaVisita);
     saveData();
+    pushVisitToSheets(nuevaVisita); // sincronizar en segundo plano
     clearForm();
     updateStats();
     renderRecentToday();
     updateStorageBar();
     updateTimestamp('timestamp-registro');
     showAlert('success', `✓ Visita registrada a las ${horaActual}`);
-
-    // Foco de vuelta en patente para agilizar el flujo
     setTimeout(() => document.getElementById('patente').focus(), 100);
   }
 
   function clearForm() {
-    ['patente', 'tipo-vehiculo', 'conductor', 'rut', 'destino', 'notas'].forEach(id => {
+    ['patente', 'conductor', 'rut', 'destino', 'notas'].forEach(id => {
       document.getElementById(id).value = '';
     });
     updateCharCount();
@@ -1675,7 +1693,7 @@
     const vehiculos = {};
     visits.forEach(v => {
       if (!vehiculos[v.patente]) {
-        vehiculos[v.patente] = { patente: v.patente, tipoVehiculo: v.tipoVehiculo || 'Auto', conductor: v.conductor, count: 0 };
+        vehiculos[v.patente] = { patente: v.patente, conductor: v.conductor, count: 0 };
       }
       vehiculos[v.patente].count++;
     });
@@ -1688,7 +1706,7 @@
           <div class="top-rank">${i + 1}</div>
           <div class="top-info">
             <div class="top-plate">${v.patente}</div>
-            <div class="top-driver">${v.tipoVehiculo} • ${v.conductor || 'S/N'}</div>
+            <div class="top-driver">${v.conductor || 'S/N'}</div>
             <div class="top-category">${getCategoryByCount(v.count)}</div>
           </div>
         </div>
@@ -1730,7 +1748,7 @@
         <div class="list-item">
           <div class="item-number">${visits.length - visits.indexOf(v)}</div>
           <div class="item-info">
-            <div class="item-plate">${v.patente} • ${v.tipoVehiculo || 'Auto'}</div>
+            <div class="item-plate">${v.patente}</div>
             <div class="item-name">${v.conductor || 'Sin nombre'}</div>
             <div class="item-meta">${v.rut || 'Sin RUT'} • ${v.destino}</div>
             ${v.notas ? `<div class="item-meta">📝 ${v.notas}</div>` : ''}
@@ -1750,7 +1768,7 @@
     const vehiculos = {};
     visits.forEach(v => {
       if (!vehiculos[v.patente]) {
-        vehiculos[v.patente] = { patente: v.patente, tipoVehiculo: v.tipoVehiculo || 'Auto', conductor: v.conductor, count: 0 };
+        vehiculos[v.patente] = { patente: v.patente, conductor: v.conductor, count: 0 };
       }
       vehiculos[v.patente].count++;
     });
@@ -1769,7 +1787,7 @@
         <div class="item-number">${v.count}</div>
         <div class="item-info">
           <div class="item-plate">${v.patente}</div>
-          <div class="item-name">${v.tipoVehiculo || 'Auto'} • ${v.conductor || 'Sin nombre'}</div>
+          <div class="item-name">${v.conductor || 'Sin nombre'}</div>
           <div class="item-category">${getCategoryByCount(v.count)}</div>
         </div>
       </div>
@@ -1834,68 +1852,7 @@
     renderContacts();
   }
 
-  function generatePDFWithTitle(data, type, customTitle) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const primary = [10, 14, 39], accent = [255, 107, 53];
-    const W = 210, M = 14, UW = W - M * 2;
-
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, W, 30, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.text('Alacran Technologies', M, 15);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(customTitle, M, 23);
-
-    let y = 40;
-    doc.setTextColor(...primary);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(`Total: ${data.length} visitas | Usuario: ${DEFAULT_USER}`, M, y);
-    y += 10;
-
-    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 18 }, { l: 'Tipo', w: 20 }, { l: 'Conductor', w: 28 }, { l: 'RUT', w: 22 }, { l: 'Destino', w: 40 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 32 }];
-
-    doc.setFillColor(...primary);
-    doc.rect(M, y, UW, 7, 'F');
-    let xc = M + 1;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(255, 255, 255);
-    cols.forEach(c => { doc.text(c.l, xc, y + 4.5); xc += c.w; });
-    y += 7;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.setTextColor(...primary);
-
-    data.forEach((v, idx) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
-      doc.rect(M, y, UW, 6, 'F');
-
-      const rowData = [String(idx + 1), v.patente, (v.tipoVehiculo || 'Auto').slice(0, 15), v.conductor.slice(0, 15), v.rut, v.destino.slice(0, 18), v.hora, v.notas.slice(0, 13)];
-      xc = M + 1;
-      cols.forEach((c, ci) => {
-        doc.text(rowData[ci], xc, y + 4);
-        xc += c.w;
-      });
-      y += 6;
-    });
-
-    let filename;
-    if (type.includes('noche')) {
-      filename = `visitas_turno_noche_${new Date().toISOString().split('T')[0]}.pdf`;
-    } else {
-      filename = `visitas_${type}.pdf`;
-    }
-    
-    doc.save(filename);
-  }
+  // ════════════════════ EXPORTAR ════════════════════
   function exportPDFDaily() {
     const today = new Date().toISOString().split('T')[0];
     const hoyVisitas = visits.filter(v => v.fecha === today);
@@ -1935,48 +1892,6 @@
     generatePDF(filtered, `${desde}_${hasta}`);
   }
 
-  function exportPDFNight() {
-    const desde = document.getElementById('fecha-noche-desde').value;
-    const hasta = document.getElementById('fecha-noche-hasta').value;
-
-    if (!desde || !hasta) {
-      showAlert('error', 'Ingresa ambas fechas');
-      return;
-    }
-
-    // Filtrar visitas del turno noche: desde 20:00 de 'desde' hasta 08:00 de 'hasta'
-    const filtered = visits.filter(v => {
-      const hora = v.hora; // formato HH:MM
-      const fecha = v.fecha; // formato YYYY-MM-DD
-
-      // Si la fecha es la de inicio, aceptar desde las 20:00 en adelante
-      if (fecha === desde) {
-        return hora >= '20:00';
-      }
-      // Si la fecha es entre inicio y término (sin incluir), aceptar todas
-      if (fecha > desde && fecha < hasta) {
-        return true;
-      }
-      // Si la fecha es la de término, aceptar hasta las 08:00
-      if (fecha === hasta) {
-        return hora < '08:00';
-      }
-      return false;
-    });
-
-    if (!filtered.length) {
-      showAlert('error', 'Sin visitas en este turno noche');
-      return;
-    }
-
-    const [y1, m1, d1] = desde.split('-');
-    const [y2, m2, d2] = hasta.split('-');
-    const type = `noche_${desde}_${hasta}`;
-    
-    const titulo = `Turno Noche ${d1}/${m1} 20:00 - ${d2}/${m2} 08:00`;
-    generatePDFWithTitle(filtered, type, titulo);
-  }
-
   function generatePDF(data, type) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -2012,7 +1927,7 @@
     doc.text(`Total: ${data.length} visitas | Usuario: ${DEFAULT_USER}`, M, y);
     y += 10;
 
-    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 18 }, { l: 'Tipo', w: 20 }, { l: 'Conductor', w: 28 }, { l: 'RUT', w: 22 }, { l: 'Destino', w: 40 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 32 }];
+    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 22 }, { l: 'Conductor', w: 35 }, { l: 'RUT', w: 25 }, { l: 'Destino', w: 45 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 36 }];
 
     doc.setFillColor(...primary);
     doc.rect(M, y, UW, 7, 'F');
@@ -2032,7 +1947,7 @@
       doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
       doc.rect(M, y, UW, 6, 'F');
 
-      const rowData = [String(idx + 1), v.patente, (v.tipoVehiculo || 'Auto').slice(0, 15), v.conductor.slice(0, 15), v.rut, v.destino.slice(0, 18), v.hora, v.notas.slice(0, 13)];
+      const rowData = [String(idx + 1), v.patente, v.conductor.slice(0, 18), v.rut, v.destino.slice(0, 20), v.hora, v.notas.slice(0, 15)];
       xc = M + 1;
       cols.forEach((c, ci) => {
         doc.text(rowData[ci], xc, y + 4);
@@ -2082,7 +1997,7 @@
 
     let mensaje = `Visitas acumuladas del ${fechaDisplay}:%0A%0ATotal: ${hoyVisitas.length} vehículos%0A%0A`;
     hoyVisitas.forEach((v, i) => {
-      mensaje += `${i + 1}. ${v.patente} (${v.tipoVehiculo || 'Auto'}) - ${v.conductor || 'S/N'} (${v.hora})`;
+      mensaje += `${i + 1}. ${v.patente} - ${v.conductor || 'S/N'} (${v.hora})`;
       if (v.notas) mensaje += ` - ${v.notas}`;
       mensaje += '%0A';
     });
@@ -2108,6 +2023,7 @@
 
   function confirmarEliminar() {
     if (pendingDeleteId === null) return;
+    deleteFromSheets(pendingDeleteId); // eliminar en Sheets en segundo plano
     visits = visits.filter(v => v.id !== pendingDeleteId);
     pendingDeleteId = null;
     saveData();
