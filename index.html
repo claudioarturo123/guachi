@@ -1224,6 +1224,24 @@
 
     <div class="card">
       <div class="card-header">
+        <div class="card-icon">🌙</div>
+        <div class="card-title">Turno Noche (20:00 - 08:00)</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Fecha inicio (desde 20:00)</label>
+          <input type="date" id="fecha-noche-desde">
+        </div>
+        <div class="form-group">
+          <label>Fecha término (hasta 08:00)</label>
+          <input type="date" id="fecha-noche-hasta">
+        </div>
+      </div>
+
+      <button class="btn-secondary" onclick="exportPDFNight()">🌙 Exportar turno noche</button>
+    </div>
+      <div class="card-header">
         <div class="card-icon">💬</div>
         <div class="card-title">WhatsApp</div>
       </div>
@@ -1375,6 +1393,13 @@
     const hoy = now.toISOString().split('T')[0];
     document.getElementById('fecha-desde').value = hoy;
     document.getElementById('fecha-hasta').value = hoy;
+
+    // Para turno noche: ayer a hoy
+    const ayer = new Date(now);
+    ayer.setDate(ayer.getDate() - 1);
+    const ayerStr = ayer.toISOString().split('T')[0];
+    document.getElementById('fecha-noche-desde').value = ayerStr;
+    document.getElementById('fecha-noche-hasta').value = hoy;
   }
 
   function updateTimestamp(elementId) {
@@ -1809,7 +1834,68 @@
     renderContacts();
   }
 
-  // ════════════════════ EXPORTAR ════════════════════
+  function generatePDFWithTitle(data, type, customTitle) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const primary = [10, 14, 39], accent = [255, 107, 53];
+    const W = 210, M = 14, UW = W - M * 2;
+
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, W, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('Alacran Technologies', M, 15);
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(customTitle, M, 23);
+
+    let y = 40;
+    doc.setTextColor(...primary);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(`Total: ${data.length} visitas | Usuario: ${DEFAULT_USER}`, M, y);
+    y += 10;
+
+    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 18 }, { l: 'Tipo', w: 20 }, { l: 'Conductor', w: 28 }, { l: 'RUT', w: 22 }, { l: 'Destino', w: 40 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 32 }];
+
+    doc.setFillColor(...primary);
+    doc.rect(M, y, UW, 7, 'F');
+    let xc = M + 1;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    cols.forEach(c => { doc.text(c.l, xc, y + 4.5); xc += c.w; });
+    y += 7;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...primary);
+
+    data.forEach((v, idx) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
+      doc.rect(M, y, UW, 6, 'F');
+
+      const rowData = [String(idx + 1), v.patente, (v.tipoVehiculo || 'Auto').slice(0, 15), v.conductor.slice(0, 15), v.rut, v.destino.slice(0, 18), v.hora, v.notas.slice(0, 13)];
+      xc = M + 1;
+      cols.forEach((c, ci) => {
+        doc.text(rowData[ci], xc, y + 4);
+        xc += c.w;
+      });
+      y += 6;
+    });
+
+    let filename;
+    if (type.includes('noche')) {
+      filename = `visitas_turno_noche_${new Date().toISOString().split('T')[0]}.pdf`;
+    } else {
+      filename = `visitas_${type}.pdf`;
+    }
+    
+    doc.save(filename);
+  }
   function exportPDFDaily() {
     const today = new Date().toISOString().split('T')[0];
     const hoyVisitas = visits.filter(v => v.fecha === today);
@@ -1847,6 +1933,48 @@
     }
 
     generatePDF(filtered, `${desde}_${hasta}`);
+  }
+
+  function exportPDFNight() {
+    const desde = document.getElementById('fecha-noche-desde').value;
+    const hasta = document.getElementById('fecha-noche-hasta').value;
+
+    if (!desde || !hasta) {
+      showAlert('error', 'Ingresa ambas fechas');
+      return;
+    }
+
+    // Filtrar visitas del turno noche: desde 20:00 de 'desde' hasta 08:00 de 'hasta'
+    const filtered = visits.filter(v => {
+      const hora = v.hora; // formato HH:MM
+      const fecha = v.fecha; // formato YYYY-MM-DD
+
+      // Si la fecha es la de inicio, aceptar desde las 20:00 en adelante
+      if (fecha === desde) {
+        return hora >= '20:00';
+      }
+      // Si la fecha es entre inicio y término (sin incluir), aceptar todas
+      if (fecha > desde && fecha < hasta) {
+        return true;
+      }
+      // Si la fecha es la de término, aceptar hasta las 08:00
+      if (fecha === hasta) {
+        return hora < '08:00';
+      }
+      return false;
+    });
+
+    if (!filtered.length) {
+      showAlert('error', 'Sin visitas en este turno noche');
+      return;
+    }
+
+    const [y1, m1, d1] = desde.split('-');
+    const [y2, m2, d2] = hasta.split('-');
+    const type = `noche_${desde}_${hasta}`;
+    
+    const titulo = `Turno Noche ${d1}/${m1} 20:00 - ${d2}/${m2} 08:00`;
+    generatePDFWithTitle(filtered, type, titulo);
   }
 
   function generatePDF(data, type) {
