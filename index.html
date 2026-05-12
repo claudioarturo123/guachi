@@ -3,20 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="Centro de Distribución - Sistema de registro de visitas vehiculares">
-<meta name="theme-color" content="#0a0e27">
-<title>Centro de Distribución - Registro de Visitas</title>
+<meta name="description" content="Alacran Technologies - Sistema de registro de visitas vehiculares">
+<meta name="theme-color" content="#191919">
+<title>Alacran Technologies - Registro de Visitas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap');
+
+  /* Fuente tipo matrícula para la patente */
+  .plate-font {
+    font-family: 'Share Tech Mono', 'Courier New', monospace;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Logo alacrán SVG */
+  .alacran-logo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0e27;
-    --bg-secondary: #131829;
-    --bg-tertiary: #1a2038;
+    --bg: #191919;
+    --bg-secondary: #222222;
+    --bg-tertiary: #2a2a2a;
     --accent: #ff6b35;
     --accent-light: #ff8555;
     --success: #10a37f;
@@ -24,8 +42,8 @@
     --text-primary: #e4e6eb;
     --text-secondary: #b0b3b8;
     --text-tertiary: #8a8d93;
-    --border: #2a3043;
-    --border-light: #373d4f;
+    --border: #333333;
+    --border-light: #3d3d3d;
   }
 
   html, body {
@@ -716,8 +734,40 @@
 <!-- LOGIN -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
-    <div class="login-logo">CD</div>
-    <div class="login-title">Centro de Distribución</div>
+    <div class="login-logo">
+      <svg viewBox="0 0 60 60" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- cuerpo -->
+        <ellipse cx="30" cy="32" rx="8" ry="13" fill="white" opacity="0.95"/>
+        <!-- cabeza -->
+        <ellipse cx="30" cy="19" rx="6" ry="5" fill="white" opacity="0.95"/>
+        <!-- cola curva (segmentos) -->
+        <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+        <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+        <!-- aguijón -->
+        <path d="M44 57 Q47 53 45 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M16 57 Q13 53 15 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- pinzas izquierda -->
+        <path d="M24 20 Q18 14 12 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M12 16 Q8 12 9 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M12 16 Q7 17 6 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- pinzas derecha -->
+        <path d="M36 20 Q42 14 48 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M48 16 Q52 12 51 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M48 16 Q53 17 54 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- patas izquierda -->
+        <path d="M24 28 Q16 26 11 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M24 33 Q16 32 10 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M24 38 Q17 38 12 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- patas derecha -->
+        <path d="M36 28 Q44 26 49 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M36 33 Q44 32 50 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M36 38 Q43 38 48 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <!-- ojos -->
+        <circle cx="27" cy="18" r="1.5" fill="#ff6b35"/>
+        <circle cx="33" cy="18" r="1.5" fill="#ff6b35"/>
+      </svg>
+    </div>
+    <div class="login-title">Alacran Technologies</div>
     <div class="login-subtitle">Ingresa tu PIN de acceso</div>
     <input type="password" id="pin-input" class="pin-input" placeholder="••••••••" maxlength="20">
     <button class="btn-login" onclick="checkPin()">Ingresar</button>
@@ -729,10 +779,33 @@
 
 <header>
   <div class="header-content">
-    <div class="logo-box">CD</div>
+    <div class="logo-box">
+      <svg viewBox="0 0 60 60" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="30" cy="32" rx="8" ry="13" fill="white" opacity="0.95"/>
+        <ellipse cx="30" cy="19" rx="6" ry="5" fill="white" opacity="0.95"/>
+        <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+        <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
+        <path d="M44 57 Q47 53 45 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M16 57 Q13 53 15 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M24 20 Q18 14 12 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M12 16 Q8 12 9 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M12 16 Q7 17 6 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M36 20 Q42 14 48 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M48 16 Q52 12 51 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M48 16 Q53 17 54 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M24 28 Q16 26 11 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M24 33 Q16 32 10 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M24 38 Q17 38 12 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M36 28 Q44 26 49 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M36 33 Q44 32 50 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <path d="M36 38 Q43 38 48 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <circle cx="27" cy="18" r="1.5" fill="#ff6b35"/>
+        <circle cx="33" cy="18" r="1.5" fill="#ff6b35"/>
+      </svg>
+    </div>
     <div class="header-text">
-      <h1>Centro de Distribución</h1>
-      <p>Registro de visitas</p>
+      <h1>Alacran Technologies</h1>
+      <p>Registro de visitas vehiculares</p>
     </div>
     <div class="header-actions">
       <button class="btn-logout" onclick="logout()">🚪 Salir</button>
@@ -745,7 +818,6 @@
   <button class="tab" onclick="switchTab(event, 'dashboard')">📊 Dashboard</button>
   <button class="tab" onclick="switchTab(event, 'historial')">📋 Historial</button>
   <button class="tab" onclick="switchTab(event, 'recurrentes')">🔄 Recurrentes</button>
-  <button class="tab" onclick="switchTab(event, 'contactos')">👥 Contactos</button>
   <button class="tab" onclick="switchTab(event, 'exportar')">📤 Exportar</button>
 </div>
 
@@ -761,14 +833,17 @@
 
       <div class="form-grid">
         <div class="form-group full autocomplete-wrapper">
-          <label>Patente</label>
-          <input type="text" id="patente" placeholder="AB-CD-01" autocomplete="off">
+          <label>Patente *</label>
+          <input type="text" id="patente" placeholder="ABCD12" autocomplete="off"
+            class="plate-font"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
+            style="letter-spacing:4px;font-family:'Share Tech Mono','Courier New',monospace;font-size:17px;">
           <div class="dropdown" id="dropdown"></div>
         </div>
 
         <div class="form-group">
-          <label>Conductor (opcional)</label>
-          <input type="text" id="conductor" placeholder="Nombre" autocomplete="off">
+          <label>Conductor *</label>
+          <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
         </div>
 
         <div class="form-group">
@@ -782,8 +857,8 @@
         </div>
 
         <div class="form-group full">
-          <label>Destino</label>
-          <input type="text" id="destino" placeholder="Ubicación">
+          <label>Destino *</label>
+          <input type="text" id="destino" placeholder="¿A dónde se dirige?">
         </div>
 
         <div class="form-group">
@@ -792,7 +867,7 @@
         </div>
 
         <div class="form-group full">
-          <label>Notas (máximo 200 caracteres)</label>
+          <label>Notas (opcional, máximo 200 caracteres)</label>
           <textarea id="notas" placeholder="Cambio de turno, conductor nuevo, novedades, etc..." maxlength="200" onkeyup="updateCharCount()"></textarea>
           <div class="char-count"><span id="char-count">0</span>/200</div>
         </div>
@@ -898,45 +973,6 @@
     </div>
   </section>
 
-  <!-- SECCIÓN CONTACTOS -->
-  <section id="contactos" class="section">
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">➕</div>
-        <div class="card-title">Agregar contacto</div>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Nombre</label>
-          <input type="text" id="contact-name" placeholder="Nombre del conductor">
-        </div>
-
-        <div class="form-group">
-          <label>RUT</label>
-          <input type="text" id="contact-rut" placeholder="12.345.678-9">
-        </div>
-
-        <div class="form-group">
-          <label>Empresa</label>
-          <input type="text" id="contact-empresa" placeholder="Empresa">
-        </div>
-      </div>
-
-      <button class="btn-primary" onclick="addContact()">➕ Agregar</button>
-      <div class="alert" id="alert-contact"></div>
-    </div>
-
-    <div class="card">
-      <div class="list-header">
-        <div class="list-title">Contactos guardados</div>
-        <div class="list-count" id="count-contacts">0</div>
-      </div>
-
-      <div id="list-contacts"></div>
-    </div>
-  </section>
-
   <!-- SECCIÓN EXPORTAR -->
   <section id="exportar" class="section">
     <div class="card">
@@ -994,7 +1030,33 @@
 
 </main>
 
-<footer>© 2024 Centro de Distribución | v6.0 | Tema Oscuro</footer>
+<footer>
+  <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+    <svg viewBox="0 0 60 60" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
+      <ellipse cx="30" cy="32" rx="8" ry="13" fill="#ff6b35" opacity="0.9"/>
+      <ellipse cx="30" cy="19" rx="6" ry="5" fill="#ff6b35" opacity="0.9"/>
+      <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="#ff6b35" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="#ff6b35" stroke-width="3" stroke-linecap="round" fill="none"/>
+      <path d="M44 57 Q47 53 45 49" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M16 57 Q13 53 15 49" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M24 20 Q18 14 12 16" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M12 16 Q8 12 9 8" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M12 16 Q7 17 6 22" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M36 20 Q42 14 48 16" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M48 16 Q52 12 51 8" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M48 16 Q53 17 54 22" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <path d="M24 28 Q16 26 11 28" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M24 33 Q16 32 10 35" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M24 38 Q17 38 12 42" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M36 28 Q44 26 49 28" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M36 33 Q44 32 50 35" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <path d="M36 38 Q43 38 48 42" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      <circle cx="27" cy="18" r="1.5" fill="white"/>
+      <circle cx="33" cy="18" r="1.5" fill="white"/>
+    </svg>
+    <span>© 2026 — Elaborado por <strong style="color:var(--accent)">Alacran Technologies</strong> | v6.0</span>
+  </div>
+</footer>
 
 </div>
 
@@ -1102,7 +1164,6 @@
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'historial') renderHistorial();
     if (tab === 'recurrentes') renderRecurrentes();
-    if (tab === 'contactos') renderContacts();
   }
 
   // ════════════════════ REGISTRO ════════════════════
@@ -1155,17 +1216,28 @@
 
   function registerVisit() {
     const patente = document.getElementById('patente').value.trim().toUpperCase();
+    const conductor = document.getElementById('conductor').value.trim();
+    const destino = document.getElementById('destino').value.trim();
+
     if (!patente) {
-      showAlert('error', 'Ingresa la patente');
+      showAlert('error', '⚠️ Ingresa la patente del vehículo');
+      return;
+    }
+    if (!conductor) {
+      showAlert('error', '⚠️ El nombre del conductor es obligatorio');
+      return;
+    }
+    if (!destino) {
+      showAlert('error', '⚠️ El destino es obligatorio');
       return;
     }
 
     visits.push({
       id: Date.now(),
       patente,
-      conductor: document.getElementById('conductor').value.trim(),
+      conductor,
       rut: document.getElementById('rut').value.trim(),
-      destino: document.getElementById('destino').value.trim(),
+      destino,
       fecha: document.getElementById('fecha').value,
       hora: document.getElementById('hora').value,
       notas: document.getElementById('notas').value.trim(),
@@ -1176,7 +1248,7 @@
     clearForm();
     updateStats();
     updateTimestamp('timestamp-registro');
-    showAlert('success', '✓ Visita registrada');
+    showAlert('success', '✓ Visita registrada correctamente');
   }
 
   function clearForm() {
@@ -1188,10 +1260,10 @@
   }
 
   function showAlert(type, msg) {
-    const alert = document.getElementById('alert') || document.getElementById('alert-contact');
+    const alert = document.getElementById('alert');
     alert.className = `alert ${type}`;
     alert.textContent = msg;
-    setTimeout(() => { alert.className = 'alert'; }, 3000);
+    setTimeout(() => { alert.className = 'alert'; }, 3500);
   }
 
   // ════════════════════ ESTADÍSTICAS ════════════════════
@@ -1508,7 +1580,7 @@
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
-    doc.text('Centro de Distribución', M, 15);
+    doc.text('Alacran Technologies', M, 15);
     
     let title = 'Registro de Visitas';
     if (type !== 'completo' && !type.includes('_')) {
