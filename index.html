@@ -1353,48 +1353,66 @@
   async function pushVisitToSheets(visit) {
     setConexionStatus('syncing');
     try {
+      // Usamos un form-data encoded que sí pasa con no-cors
+      const form = new FormData();
+      form.append('action', 'insert');
+      form.append('id', String(visit.id));
+      form.append('patente', visit.patente || '');
+      form.append('conductor', visit.conductor || '');
+      form.append('rut', visit.rut || '');
+      form.append('destino', visit.destino || '');
+      form.append('fecha', visit.fecha || '');
+      form.append('hora', visit.hora || '');
+      form.append('notas', visit.notas || '');
+
       await fetch(GS_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'insert', ...visit })
+        body: form
       });
-      setConexionStatus('online');
-      // Marcar visita como sincronizada
+
       visit._synced = true;
       saveData();
+      setConexionStatus('online');
     } catch(e) {
-      setConexionStatus('offline');
       visit._synced = false;
       saveData();
+      setConexionStatus('offline');
     }
   }
 
   // Eliminar de Sheets
   async function deleteFromSheets(id) {
     try {
+      const form = new FormData();
+      form.append('action', 'delete');
+      form.append('id', String(id));
       await fetch(GS_URL, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id: String(id) })
+        body: form
       });
-    } catch(e) { /* sin conexión, igual se eliminó local */ }
+    } catch(e) {}
   }
 
-  // Sincronizar visitas pendientes (las que se guardaron sin internet)
+  // Sincronizar visitas pendientes
   async function syncPendientes() {
     const pendientes = visits.filter(v => !v._synced);
-    if (!pendientes.length) return;
+    if (!pendientes.length) { setConexionStatus('online'); return; }
     setConexionStatus('syncing');
     for (const v of pendientes) {
       try {
-        await fetch(GS_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'insert', ...v })
-        });
+        const form = new FormData();
+        form.append('action', 'insert');
+        form.append('id', String(v.id));
+        form.append('patente', v.patente || '');
+        form.append('conductor', v.conductor || '');
+        form.append('rut', v.rut || '');
+        form.append('destino', v.destino || '');
+        form.append('fecha', v.fecha || '');
+        form.append('hora', v.hora || '');
+        form.append('notas', v.notas || '');
+        await fetch(GS_URL, { method: 'POST', mode: 'no-cors', body: form });
         v._synced = true;
       } catch(e) { break; }
     }
@@ -1403,14 +1421,52 @@
     setConexionStatus(aun === 0 ? 'online' : 'offline');
   }
 
-  // Cargar datos: primero desde local, luego intentar sincronizar pendientes
+  // Cargar datos desde Sheets al iniciar (para sincronizar entre dispositivos)
+  async function loadDataFromSheets() {
+    try {
+      setConexionStatus('syncing');
+      const resp = await fetch(GS_URL + '?action=getAll');
+      const json = await resp.json();
+      if (json.ok && json.data && json.data.length > 0) {
+        // Convertir filas de Sheets al formato de la app
+        const sheetsVisits = json.data
+          .filter(row => row.ID || row.id)
+          .map(row => ({
+            id: Number(row.ID || row.id),
+            patente: row.PATENTE || row.patente || '',
+            conductor: row.CONDUCTOR || row.conductor || '',
+            rut: row.RUT || row.rut || '',
+            destino: row.DESTINO || row.destino || '',
+            fecha: row.FECHA || row.fecha || '',
+            hora: row.HORA || row.hora || '',
+            notas: row.NOTAS || row.notas || '',
+            _synced: true
+          }));
+        // Fusionar: mantener local y agregar los que vienen de Sheets
+        const localIds = new Set(visits.map(v => v.id));
+        const nuevos = sheetsVisits.filter(v => !localIds.has(v.id));
+        visits = [...visits, ...nuevos].sort((a, b) => b.id - a.id);
+        saveData();
+        updateStats();
+        renderRecentToday();
+        setConexionStatus('online');
+      } else {
+        setConexionStatus('online');
+      }
+    } catch(e) {
+      setConexionStatus('offline');
+      // Sin internet — usar datos locales
+    }
+  }
+
+  // Cargar datos: primero local (instantáneo), luego sincronizar con Sheets
   function loadData() {
     const v = localStorage.getItem('cd-visits');
     const c = localStorage.getItem('cd-contacts');
     if (v) visits = JSON.parse(v);
     if (c) contacts = JSON.parse(c);
-    // Intentar sincronizar pendientes en segundo plano
-    setTimeout(syncPendientes, 1500);
+    // Sincronizar con Sheets en segundo plano
+    setTimeout(loadDataFromSheets, 800);
   }
 
   function setDateTime() {
