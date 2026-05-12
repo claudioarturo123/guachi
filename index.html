@@ -3,38 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="description" content="Alacran Technologies - Sistema de registro de visitas vehiculares">
-<meta name="theme-color" content="#191919">
-<title>Alacran Technologies - Registro de Visitas</title>
+<meta name="description" content="Centro de Distribución - Sistema de registro de visitas vehiculares">
+<meta name="theme-color" content="#0a0e27">
+<title>Centro de Distribución - Registro de Visitas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap');
-
-  /* Fuente tipo matrícula para la patente */
-  .plate-font {
-    font-family: 'Share Tech Mono', 'Courier New', monospace;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-
-  /* Logo alacrán SVG */
-  .alacran-logo {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #191919;
-    --bg-secondary: #222222;
-    --bg-tertiary: #2a2a2a;
+    --bg: #0a0e27;
+    --bg-secondary: #131829;
+    --bg-tertiary: #1a2038;
     --accent: #ff6b35;
     --accent-light: #ff8555;
     --success: #10a37f;
@@ -42,8 +24,8 @@
     --text-primary: #e4e6eb;
     --text-secondary: #b0b3b8;
     --text-tertiary: #8a8d93;
-    --border: #333333;
-    --border-light: #3d3d3d;
+    --border: #2a3043;
+    --border-light: #373d4f;
   }
 
   html, body {
@@ -325,6 +307,15 @@
   input:focus, textarea:focus, select:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+  }
+
+  select {
+    cursor: pointer;
+  }
+
+  select option {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
   }
 
   input::placeholder, textarea::placeholder {
@@ -711,140 +702,6 @@
     gap: 8px;
   }
 
-  /* ════════════════════ MODAL CONFIRMAR ELIMINAR ════════════════════ */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 500;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .modal-overlay.active { display: flex; }
-  .modal-box {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px 24px;
-    max-width: 320px;
-    width: 100%;
-    text-align: center;
-    animation: popIn .18s ease;
-  }
-  @keyframes popIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .modal-icon { font-size: 36px; margin-bottom: 12px; }
-  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .modal-msg { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; }
-  .modal-actions { display: flex; gap: 10px; }
-  .btn-modal-cancel {
-    flex: 1; height: 40px; background: var(--bg-tertiary);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer;
-  }
-  .btn-modal-confirm {
-    flex: 1; height: 40px;
-    background: linear-gradient(135deg, var(--danger), #e53935);
-    border: none; border-radius: 8px;
-    color: white; font-size: 13px; font-weight: 700; cursor: pointer;
-  }
-
-  /* ════════════════════ STORAGE BAR ════════════════════ */
-  .storage-bar-wrap {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .storage-icon { font-size: 16px; flex-shrink: 0; }
-  .storage-info { flex: 1; min-width: 0; }
-  .storage-label {
-    font-size: 11px;
-    color: var(--text-secondary);
-    font-weight: 600;
-    margin-bottom: 5px;
-    display: flex;
-    justify-content: space-between;
-  }
-  .storage-track {
-    height: 6px;
-    background: var(--bg-tertiary);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .storage-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width .5s ease, background .5s;
-    background: var(--success);
-  }
-  .storage-fill.warn { background: #f59e0b; }
-  .storage-fill.danger { background: var(--danger); }
-
-  /* ════════════════════ ÚLTIMAS VISITAS DEL DÍA ════════════════════ */
-  .recent-list { display: flex; flex-direction: column; gap: 8px; }
-  .recent-item {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .recent-plate {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 2px;
-    flex-shrink: 0;
-    min-width: 70px;
-  }
-  .recent-info { flex: 1; min-width: 0; }
-  .recent-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
-  .recent-dest { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .recent-time { font-size: 11px; color: var(--text-secondary); flex-shrink: 0; font-weight: 600; }
-
-  /* ════════════════════ FILTROS HISTORIAL ════════════════════ */
-  .filter-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .filter-btn {
-    height: 32px;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .15s;
-    white-space: nowrap;
-  }
-  .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .filter-date {
-    height: 32px;
-    padding: 0 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    font-size: 12px;
-    font-family: 'Inter', sans-serif;
-    outline: none;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-
   /* ════════════════════ FOOTER ════════════════════ */
   footer {
     background: var(--bg-secondary);
@@ -868,40 +725,8 @@
 <!-- LOGIN -->
 <div class="login-screen" id="login-screen">
   <div class="login-box">
-    <div class="login-logo">
-      <svg viewBox="0 0 60 60" width="38" height="38" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- cuerpo -->
-        <ellipse cx="30" cy="32" rx="8" ry="13" fill="white" opacity="0.95"/>
-        <!-- cabeza -->
-        <ellipse cx="30" cy="19" rx="6" ry="5" fill="white" opacity="0.95"/>
-        <!-- cola curva (segmentos) -->
-        <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
-        <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
-        <!-- aguijón -->
-        <path d="M44 57 Q47 53 45 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M16 57 Q13 53 15 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <!-- pinzas izquierda -->
-        <path d="M24 20 Q18 14 12 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M12 16 Q8 12 9 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M12 16 Q7 17 6 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <!-- pinzas derecha -->
-        <path d="M36 20 Q42 14 48 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M48 16 Q52 12 51 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M48 16 Q53 17 54 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <!-- patas izquierda -->
-        <path d="M24 28 Q16 26 11 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M24 33 Q16 32 10 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M24 38 Q17 38 12 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <!-- patas derecha -->
-        <path d="M36 28 Q44 26 49 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M36 33 Q44 32 50 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M36 38 Q43 38 48 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <!-- ojos -->
-        <circle cx="27" cy="18" r="1.5" fill="#ff6b35"/>
-        <circle cx="33" cy="18" r="1.5" fill="#ff6b35"/>
-      </svg>
-    </div>
-    <div class="login-title">Alacran Technologies</div>
+    <div class="login-logo">CD</div>
+    <div class="login-title">Centro de Distribución</div>
     <div class="login-subtitle">Ingresa tu PIN de acceso</div>
     <input type="password" id="pin-input" class="pin-input" placeholder="••••••••" maxlength="20">
     <button class="btn-login" onclick="checkPin()">Ingresar</button>
@@ -913,33 +738,10 @@
 
 <header>
   <div class="header-content">
-    <div class="logo-box">
-      <svg viewBox="0 0 60 60" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="30" cy="32" rx="8" ry="13" fill="white" opacity="0.95"/>
-        <ellipse cx="30" cy="19" rx="6" ry="5" fill="white" opacity="0.95"/>
-        <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
-        <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="white" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.9"/>
-        <path d="M44 57 Q47 53 45 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M16 57 Q13 53 15 49" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M24 20 Q18 14 12 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M12 16 Q8 12 9 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M12 16 Q7 17 6 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M36 20 Q42 14 48 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M48 16 Q52 12 51 8" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M48 16 Q53 17 54 22" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-        <path d="M24 28 Q16 26 11 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M24 33 Q16 32 10 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M24 38 Q17 38 12 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M36 28 Q44 26 49 28" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M36 33 Q44 32 50 35" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <path d="M36 38 Q43 38 48 42" stroke="white" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-        <circle cx="27" cy="18" r="1.5" fill="#ff6b35"/>
-        <circle cx="33" cy="18" r="1.5" fill="#ff6b35"/>
-      </svg>
-    </div>
+    <div class="logo-box">CD</div>
     <div class="header-text">
-      <h1>Alacran Technologies</h1>
-      <p>Registro de visitas vehiculares</p>
+      <h1>Centro de Distribución</h1>
+      <p>Registro de visitas</p>
     </div>
     <div class="header-actions">
       <button class="btn-logout" onclick="logout()">🚪 Salir</button>
@@ -952,6 +754,7 @@
   <button class="tab" onclick="switchTab(event, 'dashboard')">📊 Dashboard</button>
   <button class="tab" onclick="switchTab(event, 'historial')">📋 Historial</button>
   <button class="tab" onclick="switchTab(event, 'recurrentes')">🔄 Recurrentes</button>
+  <button class="tab" onclick="switchTab(event, 'contactos')">👥 Contactos</button>
   <button class="tab" onclick="switchTab(event, 'exportar')">📤 Exportar</button>
 </div>
 
@@ -967,23 +770,32 @@
 
       <div class="form-grid">
         <div class="form-group full autocomplete-wrapper">
-          <label>Patente *</label>
-          <input type="text" id="patente" placeholder="ABCD12" autocomplete="off"
-            class="plate-font" maxlength="6"
-            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
-            style="letter-spacing:4px;font-family:'Share Tech Mono','Courier New',monospace;font-size:17px;">
+          <label>Patente</label>
+          <input type="text" id="patente" placeholder="AB-CD-01" autocomplete="off">
           <div class="dropdown" id="dropdown"></div>
         </div>
 
         <div class="form-group">
-          <label>Conductor *</label>
-          <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
+          <label>Tipo de vehículo</label>
+          <select id="tipo-vehiculo">
+            <option value="">- Selecciona -</option>
+            <option value="Auto">Auto</option>
+            <option value="Camión rampla">Camión rampla</option>
+            <option value="Camión 3 1/4">Camión 3 1/4</option>
+            <option value="Camioneta">Camioneta</option>
+            <option value="Furgón">Furgón</option>
+            <option value="Camión grúa">Camión grúa</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Conductor (opcional)</label>
+          <input type="text" id="conductor" placeholder="Nombre" autocomplete="off">
         </div>
 
         <div class="form-group">
           <label>RUT (opcional)</label>
-          <input type="text" id="rut" placeholder="12.345.678-9" maxlength="12"
-            oninput="formatRUT(this)" autocomplete="off">
+          <input type="text" id="rut" placeholder="12.345.678-9">
         </div>
 
         <div class="form-group">
@@ -992,8 +804,8 @@
         </div>
 
         <div class="form-group full">
-          <label>Destino *</label>
-          <input type="text" id="destino" placeholder="¿A dónde se dirige?">
+          <label>Destino</label>
+          <input type="text" id="destino" placeholder="Ubicación">
         </div>
 
         <div class="form-group">
@@ -1002,7 +814,7 @@
         </div>
 
         <div class="form-group full">
-          <label>Notas (opcional, máximo 200 caracteres)</label>
+          <label>Notas (máximo 200 caracteres)</label>
           <textarea id="notas" placeholder="Cambio de turno, conductor nuevo, novedades, etc..." maxlength="200" onkeyup="updateCharCount()"></textarea>
           <div class="char-count"><span id="char-count">0</span>/200</div>
         </div>
@@ -1037,31 +849,6 @@
     </div>
 
     <div class="timestamp" id="timestamp-registro"></div>
-
-    <!-- BARRA DE ALMACENAMIENTO -->
-    <div class="storage-bar-wrap">
-      <div class="storage-icon">💾</div>
-      <div class="storage-info">
-        <div class="storage-label">
-          <span>Almacenamiento local</span>
-          <span id="storage-text">Calculando...</span>
-        </div>
-        <div class="storage-track">
-          <div class="storage-fill" id="storage-fill" style="width:0%"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ÚLTIMAS VISITAS DEL DÍA -->
-    <div class="card">
-      <div class="card-header">
-        <div class="card-icon">🕐</div>
-        <div class="card-title">Últimas visitas de hoy</div>
-      </div>
-      <div id="recent-today" class="recent-list">
-        <div class="empty">Sin visitas hoy</div>
-      </div>
-    </div>
   </section>
 
   <!-- SECCIÓN DASHBOARD -->
@@ -1114,15 +901,7 @@
 
       <div class="search-box">
         <div class="search-icon">🔍</div>
-        <input type="text" id="search-historial" placeholder="Buscar por patente, conductor, destino..." onkeyup="renderHistorial()">
-      </div>
-
-      <div class="filter-row">
-        <button class="filter-btn active" onclick="setHistorialFilter('todos', this)">Todos</button>
-        <button class="filter-btn" onclick="setHistorialFilter('hoy', this)">Hoy</button>
-        <button class="filter-btn" onclick="setHistorialFilter('semana', this)">Esta semana</button>
-        <button class="filter-btn" onclick="setHistorialFilter('mes', this)">Este mes</button>
-        <input type="date" class="filter-date" id="filter-fecha-especifica" onchange="setHistorialFilter('fecha', null)" title="Filtrar por fecha específica">
+        <input type="text" id="search-historial" placeholder="Buscar..." onkeyup="renderHistorial()">
       </div>
 
       <div id="list-historial"></div>
@@ -1141,26 +920,47 @@
     </div>
   </section>
 
-  <!-- SECCIÓN EXPORTAR -->
-  <section id="exportar" class="section">
+  <!-- SECCIÓN CONTACTOS -->
+  <section id="contactos" class="section">
     <div class="card">
       <div class="card-header">
-        <div class="card-icon">💾</div>
-        <div class="card-title">Respaldo de datos (Backup)</div>
+        <div class="card-icon">➕</div>
+        <div class="card-title">Agregar contacto</div>
       </div>
-      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
-        Exporta todos tus datos como archivo JSON para respaldarlos. Si el navegador se limpia, puedes restaurarlos importando el archivo.
-      </p>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <button class="btn-secondary" onclick="exportarJSON()">📦 Exportar backup (.json)</button>
-        <label class="btn-secondary" style="cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">
-          📥 Importar backup (.json)
-          <input type="file" accept=".json" onchange="importarJSON(this)" style="display:none">
-        </label>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre</label>
+          <input type="text" id="contact-name" placeholder="Nombre del conductor">
+        </div>
+
+        <div class="form-group">
+          <label>RUT</label>
+          <input type="text" id="contact-rut" placeholder="12.345.678-9">
+        </div>
+
+        <div class="form-group">
+          <label>Empresa</label>
+          <input type="text" id="contact-empresa" placeholder="Empresa">
+        </div>
       </div>
-      <div class="alert" id="alert-backup" style="margin-top:10px;"></div>
+
+      <button class="btn-primary" onclick="addContact()">➕ Agregar</button>
+      <div class="alert" id="alert-contact"></div>
     </div>
 
+    <div class="card">
+      <div class="list-header">
+        <div class="list-title">Contactos guardados</div>
+        <div class="list-count" id="count-contacts">0</div>
+      </div>
+
+      <div id="list-contacts"></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN EXPORTAR -->
+  <section id="exportar" class="section">
     <div class="card">
       <div class="card-header">
         <div class="card-icon">📄</div>
@@ -1216,47 +1016,8 @@
 
 </main>
 
-<footer>
-  <div style="display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
-    <svg viewBox="0 0 60 60" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6">
-      <ellipse cx="30" cy="32" rx="8" ry="13" fill="#ff6b35" opacity="0.9"/>
-      <ellipse cx="30" cy="19" rx="6" ry="5" fill="#ff6b35" opacity="0.9"/>
-      <path d="M30 45 Q34 52 38 56 Q42 59 44 57" stroke="#ff6b35" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <path d="M30 45 Q26 52 22 56 Q18 59 16 57" stroke="#ff6b35" stroke-width="3" stroke-linecap="round" fill="none"/>
-      <path d="M44 57 Q47 53 45 49" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M16 57 Q13 53 15 49" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M24 20 Q18 14 12 16" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M12 16 Q8 12 9 8" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M12 16 Q7 17 6 22" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M36 20 Q42 14 48 16" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M48 16 Q52 12 51 8" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M48 16 Q53 17 54 22" stroke="#ff6b35" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <path d="M24 28 Q16 26 11 28" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M24 33 Q16 32 10 35" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M24 38 Q17 38 12 42" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M36 28 Q44 26 49 28" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M36 33 Q44 32 50 35" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M36 38 Q43 38 48 42" stroke="#ff6b35" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <circle cx="27" cy="18" r="1.5" fill="white"/>
-      <circle cx="33" cy="18" r="1.5" fill="white"/>
-    </svg>
-    <span>© 2026 — Elaborado por <strong style="color:var(--accent)">Alacran Technologies</strong> | v6.0</span>
-  </div>
-</footer>
+<footer>© 2024 Centro de Distribución | v6.0 | Tema Oscuro</footer>
 
-</div>
-
-<!-- MODAL CONFIRMAR ELIMINAR -->
-<div class="modal-overlay" id="modal-eliminar">
-  <div class="modal-box">
-    <div class="modal-icon">🗑️</div>
-    <div class="modal-title">¿Eliminar registro?</div>
-    <div class="modal-msg">Esta acción no se puede deshacer. El registro será eliminado permanentemente.</div>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
-      <button class="btn-modal-confirm" onclick="confirmarEliminar()">Eliminar</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -1265,7 +1026,6 @@
   let authenticated = false;
   let chartDays = null;
   let chartTop = null;
-  let pendingDeleteId = null;
 
   const PIN = 'alacran2026';
   const DEFAULT_USER = 'Claudio Antonio Pérez Henríquez';
@@ -1289,9 +1049,6 @@
       loadData();
       setDateTime();
       updateStats();
-      renderRecentToday();
-      updateStorageBar();
-      updateTimestamp('timestamp-registro');
     } else {
       document.getElementById('error-login').textContent = '❌ PIN incorrecto';
     }
@@ -1311,12 +1068,6 @@
       authenticated = true;
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('app').style.display = '';
-      loadData();
-      setDateTime();
-      updateStats();
-      renderRecentToday();
-      updateStorageBar();
-      updateTimestamp('timestamp-registro');
     }
   }
 
@@ -1373,36 +1124,7 @@
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'historial') renderHistorial();
     if (tab === 'recurrentes') renderRecurrentes();
-  }
-
-  // ════════════════════ FORMATO RUT ════════════════════
-  function formatRUT(input) {
-    // Guardar posición del cursor
-    let val = input.value;
-
-    // Dejar solo dígitos y K
-    let clean = val.replace(/[^0-9kK]/g, '').toUpperCase();
-
-    if (clean.length === 0) { input.value = ''; return; }
-
-    // Separar cuerpo y dígito verificador
-    let dv = clean.slice(-1);
-    let body = clean.slice(0, -1);
-
-    // Aplicar puntos cada 3 dígitos desde la derecha
-    let bodyFormatted = '';
-    while (body.length > 3) {
-      bodyFormatted = '.' + body.slice(-3) + bodyFormatted;
-      body = body.slice(0, -3);
-    }
-    bodyFormatted = body + bodyFormatted;
-
-    // Si solo hay 1 dígito total (ej: "1"), no poner guión todavía
-    if (clean.length === 1) {
-      input.value = clean;
-    } else {
-      input.value = bodyFormatted + '-' + dv;
-    }
+    if (tab === 'contactos') renderContacts();
   }
 
   // ════════════════════ REGISTRO ════════════════════
@@ -1428,7 +1150,7 @@
     }
 
     dropdown.innerHTML = matches.map(v => `
-      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}')">
+      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.tipoVehiculo}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}')">
         <div class="dropdown-plate">${v.patente}</div>
         <div class="dropdown-name">${v.conductor || 'Sin nombre'}</div>
       </div>
@@ -1437,8 +1159,9 @@
     dropdown.classList.add('active');
   });
 
-  function selectVehicle(patente, conductor, rut, destino, notas) {
+  function selectVehicle(patente, tipoVehiculo, conductor, rut, destino, notas) {
     document.getElementById('patente').value = patente;
+    document.getElementById('tipo-vehiculo').value = tipoVehiculo;
     document.getElementById('conductor').value = conductor;
     document.getElementById('rut').value = rut;
     document.getElementById('destino').value = destino;
@@ -1455,26 +1178,27 @@
 
   function registerVisit() {
     const patente = document.getElementById('patente').value.trim().toUpperCase();
-    const conductor = document.getElementById('conductor').value.trim();
-    const destino = document.getElementById('destino').value.trim();
+    const tipoVehiculo = document.getElementById('tipo-vehiculo').value.trim();
+    
+    if (!patente) {
+      showAlert('error', 'Ingresa la patente');
+      return;
+    }
 
-    if (!patente) { showAlert('error', '⚠️ Ingresa la patente del vehículo'); return; }
-    if (!conductor) { showAlert('error', '⚠️ El nombre del conductor es obligatorio'); return; }
-    if (!destino) { showAlert('error', '⚠️ El destino es obligatorio'); return; }
-
-    // Actualizar hora al momento exacto de registrar
-    const now = new Date();
-    const horaActual = now.toTimeString().slice(0, 5);
-    const fechaActual = now.toISOString().split('T')[0];
+    if (!tipoVehiculo) {
+      showAlert('error', 'Selecciona el tipo de vehículo');
+      return;
+    }
 
     visits.push({
       id: Date.now(),
       patente,
-      conductor,
+      tipoVehiculo,
+      conductor: document.getElementById('conductor').value.trim(),
       rut: document.getElementById('rut').value.trim(),
-      destino,
-      fecha: fechaActual,
-      hora: horaActual,
+      destino: document.getElementById('destino').value.trim(),
+      fecha: document.getElementById('fecha').value,
+      hora: document.getElementById('hora').value,
       notas: document.getElementById('notas').value.trim(),
       usuario: DEFAULT_USER
     });
@@ -1482,17 +1206,12 @@
     saveData();
     clearForm();
     updateStats();
-    renderRecentToday();
-    updateStorageBar();
     updateTimestamp('timestamp-registro');
-    showAlert('success', `✓ Visita registrada a las ${horaActual}`);
-
-    // Foco de vuelta en patente para agilizar el flujo
-    setTimeout(() => document.getElementById('patente').focus(), 100);
+    showAlert('success', '✓ Visita registrada');
   }
 
   function clearForm() {
-    ['patente', 'conductor', 'rut', 'destino', 'notas'].forEach(id => {
+    ['patente', 'tipo-vehiculo', 'conductor', 'rut', 'destino', 'notas'].forEach(id => {
       document.getElementById(id).value = '';
     });
     updateCharCount();
@@ -1500,10 +1219,10 @@
   }
 
   function showAlert(type, msg) {
-    const alert = document.getElementById('alert');
+    const alert = document.getElementById('alert') || document.getElementById('alert-contact');
     alert.className = `alert ${type}`;
     alert.textContent = msg;
-    setTimeout(() => { alert.className = 'alert'; }, 3500);
+    setTimeout(() => { alert.className = 'alert'; }, 3000);
   }
 
   // ════════════════════ ESTADÍSTICAS ════════════════════
@@ -1617,7 +1336,7 @@
     const vehiculos = {};
     visits.forEach(v => {
       if (!vehiculos[v.patente]) {
-        vehiculos[v.patente] = { patente: v.patente, conductor: v.conductor, count: 0 };
+        vehiculos[v.patente] = { patente: v.patente, tipoVehiculo: v.tipoVehiculo, conductor: v.conductor, count: 0 };
       }
       vehiculos[v.patente].count++;
     });
@@ -1630,7 +1349,7 @@
           <div class="top-rank">${i + 1}</div>
           <div class="top-info">
             <div class="top-plate">${v.patente}</div>
-            <div class="top-driver">${v.conductor || 'S/N'}</div>
+            <div class="top-driver">${v.tipoVehiculo} • ${v.conductor || 'S/N'}</div>
             <div class="top-category">${getCategoryByCount(v.count)}</div>
           </div>
         </div>
@@ -1641,21 +1360,14 @@
 
   // ════════════════════ HISTORIAL ════════════════════
   function renderHistorial() {
-    const search = document.getElementById('search-historial').value.toLowerCase().trim();
-    let filtered = [...visits];
+    const search = document.getElementById('search-historial').value.toLowerCase();
+    let filtered = visits.filter(v =>
+      v.patente.toLowerCase().includes(search) ||
+      v.conductor.toLowerCase().includes(search) ||
+      v.rut.toLowerCase().includes(search)
+    );
 
-    if (search) {
-      filtered = filtered.filter(v =>
-        v.patente.toLowerCase().includes(search) ||
-        (v.conductor||'').toLowerCase().includes(search) ||
-        (v.rut||'').toLowerCase().includes(search) ||
-        (v.destino||'').toLowerCase().includes(search)
-      );
-    }
-
-    filtered = applyHistorialFilter(filtered);
-
-    document.getElementById('count-historial').textContent = `${filtered.length} / ${visits.length}`;
+    document.getElementById('count-historial').textContent = filtered.length;
     const list = document.getElementById('list-historial');
 
     if (!filtered.length) {
@@ -1672,7 +1384,7 @@
         <div class="list-item">
           <div class="item-number">${visits.length - visits.indexOf(v)}</div>
           <div class="item-info">
-            <div class="item-plate">${v.patente}</div>
+            <div class="item-plate">${v.patente} • ${v.tipoVehiculo}</div>
             <div class="item-name">${v.conductor || 'Sin nombre'}</div>
             <div class="item-meta">${v.rut || 'Sin RUT'} • ${v.destino}</div>
             ${v.notas ? `<div class="item-meta">📝 ${v.notas}</div>` : ''}
@@ -1692,7 +1404,7 @@
     const vehiculos = {};
     visits.forEach(v => {
       if (!vehiculos[v.patente]) {
-        vehiculos[v.patente] = { patente: v.patente, conductor: v.conductor, count: 0 };
+        vehiculos[v.patente] = { patente: v.patente, tipoVehiculo: v.tipoVehiculo, conductor: v.conductor, count: 0 };
       }
       vehiculos[v.patente].count++;
     });
@@ -1711,7 +1423,7 @@
         <div class="item-number">${v.count}</div>
         <div class="item-info">
           <div class="item-plate">${v.patente}</div>
-          <div class="item-name">${v.conductor || 'Sin nombre'}</div>
+          <div class="item-name">${v.tipoVehiculo} • ${v.conductor || 'Sin nombre'}</div>
           <div class="item-category">${getCategoryByCount(v.count)}</div>
         </div>
       </div>
@@ -1827,7 +1539,7 @@
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(18);
-    doc.text('Alacran Technologies', M, 15);
+    doc.text('Centro de Distribución', M, 15);
     
     let title = 'Registro de Visitas';
     if (type !== 'completo' && !type.includes('_')) {
@@ -1851,7 +1563,7 @@
     doc.text(`Total: ${data.length} visitas | Usuario: ${DEFAULT_USER}`, M, y);
     y += 10;
 
-    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 22 }, { l: 'Conductor', w: 35 }, { l: 'RUT', w: 25 }, { l: 'Destino', w: 45 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 36 }];
+    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 18 }, { l: 'Tipo', w: 20 }, { l: 'Conductor', w: 28 }, { l: 'RUT', w: 22 }, { l: 'Destino', w: 40 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 32 }];
 
     doc.setFillColor(...primary);
     doc.rect(M, y, UW, 7, 'F');
@@ -1871,7 +1583,7 @@
       doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
       doc.rect(M, y, UW, 6, 'F');
 
-      const rowData = [String(idx + 1), v.patente, v.conductor.slice(0, 18), v.rut, v.destino.slice(0, 20), v.hora, v.notas.slice(0, 15)];
+      const rowData = [String(idx + 1), v.patente, v.tipoVehiculo.slice(0, 15), v.conductor.slice(0, 15), v.rut, v.destino.slice(0, 18), v.hora, v.notas.slice(0, 13)];
       xc = M + 1;
       cols.forEach((c, ci) => {
         doc.text(rowData[ci], xc, y + 4);
@@ -1921,7 +1633,7 @@
 
     let mensaje = `Visitas acumuladas del ${fechaDisplay}:%0A%0ATotal: ${hoyVisitas.length} vehículos%0A%0A`;
     hoyVisitas.forEach((v, i) => {
-      mensaje += `${i + 1}. ${v.patente} - ${v.conductor || 'S/N'} (${v.hora})`;
+      mensaje += `${i + 1}. ${v.patente} (${v.tipoVehiculo}) - ${v.conductor || 'S/N'} (${v.hora})`;
       if (v.notas) mensaje += ` - ${v.notas}`;
       mensaje += '%0A';
     });
@@ -1936,153 +1648,12 @@
   }
 
   function deleteVisit(id) {
-    pendingDeleteId = id;
-    document.getElementById('modal-eliminar').classList.add('active');
-  }
-
-  function cerrarModal() {
-    pendingDeleteId = null;
-    document.getElementById('modal-eliminar').classList.remove('active');
-  }
-
-  function confirmarEliminar() {
-    if (pendingDeleteId === null) return;
-    visits = visits.filter(v => v.id !== pendingDeleteId);
-    pendingDeleteId = null;
-    saveData();
-    updateStats();
-    renderHistorial();
-    renderRecentToday();
-    updateStorageBar();
-    document.getElementById('modal-eliminar').classList.remove('active');
-    showAlert('success', '✓ Registro eliminado');
-  }
-
-  // Cerrar modal al hacer click fuera
-  document.getElementById('modal-eliminar').addEventListener('click', function(e) {
-    if (e.target === this) cerrarModal();
-  });
-
-  // ════════════════════ STORAGE BAR ════════════════════
-  function updateStorageBar() {
-    try {
-      const used = new Blob(Object.values(localStorage)).size;
-      const MAX = 5 * 1024 * 1024; // 5MB estimado
-      const pct = Math.min((used / MAX) * 100, 100);
-      const fill = document.getElementById('storage-fill');
-      const txt = document.getElementById('storage-text');
-      const kb = (used / 1024).toFixed(1);
-      const maxKb = (MAX / 1024).toFixed(0);
-
-      fill.style.width = pct + '%';
-      fill.className = 'storage-fill' + (pct > 85 ? ' danger' : pct > 60 ? ' warn' : '');
-      txt.textContent = `${kb} KB / ~5 MB (${pct.toFixed(1)}%)`;
-
-      if (pct > 85) {
-        showAlert('error', '⚠️ Almacenamiento casi lleno. Exporta un backup y elimina registros antiguos.');
-      }
-    } catch(e) {}
-  }
-
-  // ════════════════════ ÚLTIMAS VISITAS HOY ════════════════════
-  function renderRecentToday() {
-    const today = new Date().toISOString().split('T')[0];
-    const hoy = visits.filter(v => v.fecha === today).slice(-5).reverse();
-    const cont = document.getElementById('recent-today');
-    if (!hoy.length) {
-      cont.innerHTML = '<div class="empty" style="padding:20px 0;font-size:13px;">Sin visitas registradas hoy</div>';
-      return;
+    if (confirm('¿Eliminar este registro?')) {
+      visits = visits.filter(v => v.id !== id);
+      saveData();
+      updateStats();
+      renderHistorial();
     }
-    cont.innerHTML = hoy.map(v => `
-      <div class="recent-item">
-        <div class="recent-plate">${v.patente}</div>
-        <div class="recent-info">
-          <div class="recent-name">${v.conductor || 'Sin nombre'}</div>
-          <div class="recent-dest">→ ${v.destino}</div>
-        </div>
-        <div class="recent-time">${v.hora}</div>
-      </div>
-    `).join('');
-  }
-
-  // ════════════════════ FILTROS HISTORIAL ════════════════════
-  let historialFilter = 'todos';
-
-  function setHistorialFilter(f, btn) {
-    historialFilter = f;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    renderHistorial();
-  }
-
-  function applyHistorialFilter(list) {
-    const today = new Date().toISOString().split('T')[0];
-    const now = new Date();
-    if (historialFilter === 'hoy') return list.filter(v => v.fecha === today);
-    if (historialFilter === 'semana') {
-      const ini = new Date(now); ini.setDate(now.getDate() - now.getDay());
-      return list.filter(v => v.fecha >= ini.toISOString().split('T')[0]);
-    }
-    if (historialFilter === 'mes') {
-      const s = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
-      return list.filter(v => v.fecha >= s);
-    }
-    if (historialFilter === 'fecha') {
-      const f = document.getElementById('filter-fecha-especifica').value;
-      return f ? list.filter(v => v.fecha === f) : list;
-    }
-    return list;
-  }
-
-  // ════════════════════ BACKUP JSON ════════════════════
-  function exportarJSON() {
-    const data = {
-      version: '1.0',
-      exportado: new Date().toISOString(),
-      visits,
-      contacts
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `backup_alacran_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showAlertBackup('success', `✓ Backup exportado con ${visits.length} registros`);
-  }
-
-  function importarJSON(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (!data.visits || !Array.isArray(data.visits)) throw new Error('Formato inválido');
-        const confirm = window.confirm(`¿Importar ${data.visits.length} registros? Esto reemplazará los datos actuales.`);
-        if (!confirm) return;
-        visits = data.visits;
-        contacts = data.contacts || [];
-        saveData();
-        updateStats();
-        renderHistorial();
-        renderRecentToday();
-        updateStorageBar();
-        showAlertBackup('success', `✓ ${visits.length} registros importados correctamente`);
-      } catch(err) {
-        showAlertBackup('error', '❌ Archivo inválido. Usa un backup generado por esta app.');
-      }
-    };
-    reader.readAsText(file);
-    input.value = '';
-  }
-
-  function showAlertBackup(type, msg) {
-    const el = document.getElementById('alert-backup');
-    el.className = `alert ${type}`;
-    el.textContent = msg;
-    setTimeout(() => { el.className = 'alert'; }, 4000);
   }
 
   // ════════════════════ INIT ════════════════════
@@ -2091,8 +1662,6 @@
     loadData();
     setDateTime();
     updateStats();
-    renderRecentToday();
-    updateStorageBar();
     updateTimestamp('timestamp-registro');
   }
 </script>
