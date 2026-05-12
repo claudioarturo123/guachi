@@ -711,6 +711,140 @@
     gap: 8px;
   }
 
+  /* ════════════════════ MODAL CONFIRMAR ELIMINAR ════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal-box {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    animation: popIn .18s ease;
+  }
+  @keyframes popIn { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-icon { font-size: 36px; margin-bottom: 12px; }
+  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .modal-msg { font-size: 13px; color: var(--text-secondary); margin-bottom: 22px; }
+  .modal-actions { display: flex; gap: 10px; }
+  .btn-modal-cancel {
+    flex: 1; height: 40px; background: var(--bg-tertiary);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-secondary); font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .btn-modal-confirm {
+    flex: 1; height: 40px;
+    background: linear-gradient(135deg, var(--danger), #e53935);
+    border: none; border-radius: 8px;
+    color: white; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+
+  /* ════════════════════ STORAGE BAR ════════════════════ */
+  .storage-bar-wrap {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .storage-icon { font-size: 16px; flex-shrink: 0; }
+  .storage-info { flex: 1; min-width: 0; }
+  .storage-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .storage-track {
+    height: 6px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .storage-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width .5s ease, background .5s;
+    background: var(--success);
+  }
+  .storage-fill.warn { background: #f59e0b; }
+  .storage-fill.danger { background: var(--danger); }
+
+  /* ════════════════════ ÚLTIMAS VISITAS DEL DÍA ════════════════════ */
+  .recent-list { display: flex; flex-direction: column; gap: 8px; }
+  .recent-item {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .recent-plate {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    flex-shrink: 0;
+    min-width: 70px;
+  }
+  .recent-info { flex: 1; min-width: 0; }
+  .recent-name { font-size: 12px; font-weight: 500; color: var(--text-primary); }
+  .recent-dest { font-size: 11px; color: var(--text-tertiary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recent-time { font-size: 11px; color: var(--text-secondary); flex-shrink: 0; font-weight: 600; }
+
+  /* ════════════════════ FILTROS HISTORIAL ════════════════════ */
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .filter-date {
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
+
   /* ════════════════════ FOOTER ════════════════════ */
   footer {
     background: var(--bg-secondary);
@@ -835,7 +969,7 @@
         <div class="form-group full autocomplete-wrapper">
           <label>Patente *</label>
           <input type="text" id="patente" placeholder="ABCD12" autocomplete="off"
-            class="plate-font"
+            class="plate-font" maxlength="6"
             oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"
             style="letter-spacing:4px;font-family:'Share Tech Mono','Courier New',monospace;font-size:17px;">
           <div class="dropdown" id="dropdown"></div>
@@ -848,7 +982,8 @@
 
         <div class="form-group">
           <label>RUT (opcional)</label>
-          <input type="text" id="rut" placeholder="12.345.678-9">
+          <input type="text" id="rut" placeholder="12.345.678-9" maxlength="12"
+            oninput="formatRUT(this)" autocomplete="off">
         </div>
 
         <div class="form-group">
@@ -902,6 +1037,31 @@
     </div>
 
     <div class="timestamp" id="timestamp-registro"></div>
+
+    <!-- BARRA DE ALMACENAMIENTO -->
+    <div class="storage-bar-wrap">
+      <div class="storage-icon">💾</div>
+      <div class="storage-info">
+        <div class="storage-label">
+          <span>Almacenamiento local</span>
+          <span id="storage-text">Calculando...</span>
+        </div>
+        <div class="storage-track">
+          <div class="storage-fill" id="storage-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÚLTIMAS VISITAS DEL DÍA -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🕐</div>
+        <div class="card-title">Últimas visitas de hoy</div>
+      </div>
+      <div id="recent-today" class="recent-list">
+        <div class="empty">Sin visitas hoy</div>
+      </div>
+    </div>
   </section>
 
   <!-- SECCIÓN DASHBOARD -->
@@ -954,7 +1114,15 @@
 
       <div class="search-box">
         <div class="search-icon">🔍</div>
-        <input type="text" id="search-historial" placeholder="Buscar..." onkeyup="renderHistorial()">
+        <input type="text" id="search-historial" placeholder="Buscar por patente, conductor, destino..." onkeyup="renderHistorial()">
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setHistorialFilter('todos', this)">Todos</button>
+        <button class="filter-btn" onclick="setHistorialFilter('hoy', this)">Hoy</button>
+        <button class="filter-btn" onclick="setHistorialFilter('semana', this)">Esta semana</button>
+        <button class="filter-btn" onclick="setHistorialFilter('mes', this)">Este mes</button>
+        <input type="date" class="filter-date" id="filter-fecha-especifica" onchange="setHistorialFilter('fecha', null)" title="Filtrar por fecha específica">
       </div>
 
       <div id="list-historial"></div>
@@ -975,6 +1143,24 @@
 
   <!-- SECCIÓN EXPORTAR -->
   <section id="exportar" class="section">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💾</div>
+        <div class="card-title">Respaldo de datos (Backup)</div>
+      </div>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
+        Exporta todos tus datos como archivo JSON para respaldarlos. Si el navegador se limpia, puedes restaurarlos importando el archivo.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-secondary" onclick="exportarJSON()">📦 Exportar backup (.json)</button>
+        <label class="btn-secondary" style="cursor:pointer;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;">
+          📥 Importar backup (.json)
+          <input type="file" accept=".json" onchange="importarJSON(this)" style="display:none">
+        </label>
+      </div>
+      <div class="alert" id="alert-backup" style="margin-top:10px;"></div>
+    </div>
+
     <div class="card">
       <div class="card-header">
         <div class="card-icon">📄</div>
@@ -1060,12 +1246,24 @@
 
 </div>
 
-<script>
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay" id="modal-eliminar">
+  <div class="modal-box">
+    <div class="modal-icon">🗑️</div>
+    <div class="modal-title">¿Eliminar registro?</div>
+    <div class="modal-msg">Esta acción no se puede deshacer. El registro será eliminado permanentemente.</div>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn-modal-confirm" onclick="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>
   let visits = [];
   let contacts = [];
   let authenticated = false;
   let chartDays = null;
   let chartTop = null;
+  let pendingDeleteId = null;
 
   const PIN = 'alacran2026';
   const DEFAULT_USER = 'Claudio Antonio Pérez Henríquez';
@@ -1089,6 +1287,9 @@
       loadData();
       setDateTime();
       updateStats();
+      renderRecentToday();
+      updateStorageBar();
+      updateTimestamp('timestamp-registro');
     } else {
       document.getElementById('error-login').textContent = '❌ PIN incorrecto';
     }
@@ -1166,6 +1367,36 @@
     if (tab === 'recurrentes') renderRecurrentes();
   }
 
+  // ════════════════════ FORMATO RUT ════════════════════
+  function formatRUT(input) {
+    // Guardar posición del cursor
+    let val = input.value;
+
+    // Dejar solo dígitos y K
+    let clean = val.replace(/[^0-9kK]/g, '').toUpperCase();
+
+    if (clean.length === 0) { input.value = ''; return; }
+
+    // Separar cuerpo y dígito verificador
+    let dv = clean.slice(-1);
+    let body = clean.slice(0, -1);
+
+    // Aplicar puntos cada 3 dígitos desde la derecha
+    let bodyFormatted = '';
+    while (body.length > 3) {
+      bodyFormatted = '.' + body.slice(-3) + bodyFormatted;
+      body = body.slice(0, -3);
+    }
+    bodyFormatted = body + bodyFormatted;
+
+    // Si solo hay 1 dígito total (ej: "1"), no poner guión todavía
+    if (clean.length === 1) {
+      input.value = clean;
+    } else {
+      input.value = bodyFormatted + '-' + dv;
+    }
+  }
+
   // ════════════════════ REGISTRO ════════════════════
   document.getElementById('patente').addEventListener('input', function() {
     this.value = this.value.toUpperCase();
@@ -1219,18 +1450,14 @@
     const conductor = document.getElementById('conductor').value.trim();
     const destino = document.getElementById('destino').value.trim();
 
-    if (!patente) {
-      showAlert('error', '⚠️ Ingresa la patente del vehículo');
-      return;
-    }
-    if (!conductor) {
-      showAlert('error', '⚠️ El nombre del conductor es obligatorio');
-      return;
-    }
-    if (!destino) {
-      showAlert('error', '⚠️ El destino es obligatorio');
-      return;
-    }
+    if (!patente) { showAlert('error', '⚠️ Ingresa la patente del vehículo'); return; }
+    if (!conductor) { showAlert('error', '⚠️ El nombre del conductor es obligatorio'); return; }
+    if (!destino) { showAlert('error', '⚠️ El destino es obligatorio'); return; }
+
+    // Actualizar hora al momento exacto de registrar
+    const now = new Date();
+    const horaActual = now.toTimeString().slice(0, 5);
+    const fechaActual = now.toISOString().split('T')[0];
 
     visits.push({
       id: Date.now(),
@@ -1238,8 +1465,8 @@
       conductor,
       rut: document.getElementById('rut').value.trim(),
       destino,
-      fecha: document.getElementById('fecha').value,
-      hora: document.getElementById('hora').value,
+      fecha: fechaActual,
+      hora: horaActual,
       notas: document.getElementById('notas').value.trim(),
       usuario: DEFAULT_USER
     });
@@ -1247,8 +1474,13 @@
     saveData();
     clearForm();
     updateStats();
+    renderRecentToday();
+    updateStorageBar();
     updateTimestamp('timestamp-registro');
-    showAlert('success', '✓ Visita registrada correctamente');
+    showAlert('success', `✓ Visita registrada a las ${horaActual}`);
+
+    // Foco de vuelta en patente para agilizar el flujo
+    setTimeout(() => document.getElementById('patente').focus(), 100);
   }
 
   function clearForm() {
@@ -1401,14 +1633,21 @@
 
   // ════════════════════ HISTORIAL ════════════════════
   function renderHistorial() {
-    const search = document.getElementById('search-historial').value.toLowerCase();
-    let filtered = visits.filter(v =>
-      v.patente.toLowerCase().includes(search) ||
-      v.conductor.toLowerCase().includes(search) ||
-      v.rut.toLowerCase().includes(search)
-    );
+    const search = document.getElementById('search-historial').value.toLowerCase().trim();
+    let filtered = [...visits];
 
-    document.getElementById('count-historial').textContent = filtered.length;
+    if (search) {
+      filtered = filtered.filter(v =>
+        v.patente.toLowerCase().includes(search) ||
+        (v.conductor||'').toLowerCase().includes(search) ||
+        (v.rut||'').toLowerCase().includes(search) ||
+        (v.destino||'').toLowerCase().includes(search)
+      );
+    }
+
+    filtered = applyHistorialFilter(filtered);
+
+    document.getElementById('count-historial').textContent = `${filtered.length} / ${visits.length}`;
     const list = document.getElementById('list-historial');
 
     if (!filtered.length) {
@@ -1689,12 +1928,153 @@
   }
 
   function deleteVisit(id) {
-    if (confirm('¿Eliminar este registro?')) {
-      visits = visits.filter(v => v.id !== id);
-      saveData();
-      updateStats();
-      renderHistorial();
+    pendingDeleteId = id;
+    document.getElementById('modal-eliminar').classList.add('active');
+  }
+
+  function cerrarModal() {
+    pendingDeleteId = null;
+    document.getElementById('modal-eliminar').classList.remove('active');
+  }
+
+  function confirmarEliminar() {
+    if (pendingDeleteId === null) return;
+    visits = visits.filter(v => v.id !== pendingDeleteId);
+    pendingDeleteId = null;
+    saveData();
+    updateStats();
+    renderHistorial();
+    renderRecentToday();
+    updateStorageBar();
+    document.getElementById('modal-eliminar').classList.remove('active');
+    showAlert('success', '✓ Registro eliminado');
+  }
+
+  // Cerrar modal al hacer click fuera
+  document.getElementById('modal-eliminar').addEventListener('click', function(e) {
+    if (e.target === this) cerrarModal();
+  });
+
+  // ════════════════════ STORAGE BAR ════════════════════
+  function updateStorageBar() {
+    try {
+      const used = new Blob(Object.values(localStorage)).size;
+      const MAX = 5 * 1024 * 1024; // 5MB estimado
+      const pct = Math.min((used / MAX) * 100, 100);
+      const fill = document.getElementById('storage-fill');
+      const txt = document.getElementById('storage-text');
+      const kb = (used / 1024).toFixed(1);
+      const maxKb = (MAX / 1024).toFixed(0);
+
+      fill.style.width = pct + '%';
+      fill.className = 'storage-fill' + (pct > 85 ? ' danger' : pct > 60 ? ' warn' : '');
+      txt.textContent = `${kb} KB / ~5 MB (${pct.toFixed(1)}%)`;
+
+      if (pct > 85) {
+        showAlert('error', '⚠️ Almacenamiento casi lleno. Exporta un backup y elimina registros antiguos.');
+      }
+    } catch(e) {}
+  }
+
+  // ════════════════════ ÚLTIMAS VISITAS HOY ════════════════════
+  function renderRecentToday() {
+    const today = new Date().toISOString().split('T')[0];
+    const hoy = visits.filter(v => v.fecha === today).slice(-5).reverse();
+    const cont = document.getElementById('recent-today');
+    if (!hoy.length) {
+      cont.innerHTML = '<div class="empty" style="padding:20px 0;font-size:13px;">Sin visitas registradas hoy</div>';
+      return;
     }
+    cont.innerHTML = hoy.map(v => `
+      <div class="recent-item">
+        <div class="recent-plate">${v.patente}</div>
+        <div class="recent-info">
+          <div class="recent-name">${v.conductor || 'Sin nombre'}</div>
+          <div class="recent-dest">→ ${v.destino}</div>
+        </div>
+        <div class="recent-time">${v.hora}</div>
+      </div>
+    `).join('');
+  }
+
+  // ════════════════════ FILTROS HISTORIAL ════════════════════
+  let historialFilter = 'todos';
+
+  function setHistorialFilter(f, btn) {
+    historialFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderHistorial();
+  }
+
+  function applyHistorialFilter(list) {
+    const today = new Date().toISOString().split('T')[0];
+    const now = new Date();
+    if (historialFilter === 'hoy') return list.filter(v => v.fecha === today);
+    if (historialFilter === 'semana') {
+      const ini = new Date(now); ini.setDate(now.getDate() - now.getDay());
+      return list.filter(v => v.fecha >= ini.toISOString().split('T')[0]);
+    }
+    if (historialFilter === 'mes') {
+      const s = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-01`;
+      return list.filter(v => v.fecha >= s);
+    }
+    if (historialFilter === 'fecha') {
+      const f = document.getElementById('filter-fecha-especifica').value;
+      return f ? list.filter(v => v.fecha === f) : list;
+    }
+    return list;
+  }
+
+  // ════════════════════ BACKUP JSON ════════════════════
+  function exportarJSON() {
+    const data = {
+      version: '1.0',
+      exportado: new Date().toISOString(),
+      visits,
+      contacts
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup_alacran_${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showAlertBackup('success', `✓ Backup exportado con ${visits.length} registros`);
+  }
+
+  function importarJSON(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (!data.visits || !Array.isArray(data.visits)) throw new Error('Formato inválido');
+        const confirm = window.confirm(`¿Importar ${data.visits.length} registros? Esto reemplazará los datos actuales.`);
+        if (!confirm) return;
+        visits = data.visits;
+        contacts = data.contacts || [];
+        saveData();
+        updateStats();
+        renderHistorial();
+        renderRecentToday();
+        updateStorageBar();
+        showAlertBackup('success', `✓ ${visits.length} registros importados correctamente`);
+      } catch(err) {
+        showAlertBackup('error', '❌ Archivo inválido. Usa un backup generado por esta app.');
+      }
+    };
+    reader.readAsText(file);
+    input.value = '';
+  }
+
+  function showAlertBackup(type, msg) {
+    const el = document.getElementById('alert-backup');
+    el.className = `alert ${type}`;
+    el.textContent = msg;
+    setTimeout(() => { el.className = 'alert'; }, 4000);
   }
 
   // ════════════════════ INIT ════════════════════
@@ -1703,6 +2083,8 @@
     loadData();
     setDateTime();
     updateStats();
+    renderRecentToday();
+    updateStorageBar();
     updateTimestamp('timestamp-registro');
   }
 </script>
