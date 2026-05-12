@@ -815,15 +815,45 @@
     <div class="card">
       <div class="card-header">
         <div class="card-icon">📤</div>
-        <div class="card-title">Opciones de exportación</div>
+        <div class="card-title">Configuración WhatsApp</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Número WhatsApp del grupo (con código país)</label>
+          <input type="text" id="whatsapp-number" placeholder="Ej: 56975123456" value="">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="saveWhatsappNumber()">💾 Guardar número</button>
+      <div class="alert" id="alert-whatsapp"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📄</div>
+        <div class="card-title">Exportar visitas</div>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-secondary" onclick="exportPDFDaily()">📊 PDF - Visitas de hoy</button>
         <button class="btn-secondary" onclick="exportPDF()">📄 PDF - Reporte completo</button>
         <button class="btn-secondary" onclick="exportCSV()">📊 CSV - Hoja de cálculo</button>
         <button class="btn-secondary" onclick="exportJSON()">📋 JSON - Datos brutos</button>
         <button class="btn-secondary" onclick="importData()">📥 Importar datos</button>
         <input type="file" id="import-file" accept=".json" style="display: none;" onchange="processImport()">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">💬</div>
+        <div class="card-title">Enviar a WhatsApp</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-secondary" onclick="sendWhatsappDaily()">💬 Enviar visitas de hoy</button>
+        <p style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">Se abrirá WhatsApp con un mensaje pre-escrito. Adjunta el PDF descargado.</p>
       </div>
     </div>
   </section>
@@ -938,9 +968,11 @@
     setTimeout(() => { alert.className = 'alert'; }, 3000);
   }
 
-  // ════════════════════ AUTOCOMPLETE ════════════════════
+  // ════════════════════ PATENTE MAYÚSCULA ════════════════════
   document.getElementById('patente').addEventListener('input', function() {
-    const search = this.value.toUpperCase().trim();
+    this.value = this.value.toUpperCase();
+    
+    const search = this.value.trim();
     const dropdown = document.getElementById('dropdown');
 
     if (!search) {
@@ -1324,6 +1356,118 @@
     reader.readAsText(file);
   }
 
+  // ════════════════════ WHATSAPP ════════════════════
+  function loadWhatsappNumber() {
+    const saved = localStorage.getItem('cd-whatsapp');
+    if (saved) {
+      document.getElementById('whatsapp-number').value = saved;
+    }
+  }
+
+  function saveWhatsappNumber() {
+    const number = document.getElementById('whatsapp-number').value.trim();
+    if (!number) {
+      showAlert('error', 'Ingresa un número válido');
+      return;
+    }
+    localStorage.setItem('cd-whatsapp', number);
+    showAlert('success', '✓ Número guardado');
+  }
+
+  function exportPDFDaily() {
+    const today = new Date().toISOString().split('T')[0];
+    const hoyVisitas = visits.filter(v => v.fecha === today);
+
+    if (!hoyVisitas.length) {
+      showAlert('error', 'Sin visitas para hoy');
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const primary = [15, 23, 42], accent = [255, 107, 53];
+    const W = 210, M = 14, UW = W - M * 2;
+
+    const [y, m, d] = today.split('-');
+    const fechaDisplay = `${d}/${m}/${y}`;
+
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, W, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('Centro de Distribución', M, 15);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Visitas del ${fechaDisplay}`, M, 23);
+
+    let yPos = 40;
+    doc.setTextColor(...primary);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(`Total de visitas: ${hoyVisitas.length}`, M, yPos);
+    yPos += 10;
+
+    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 22 }, { l: 'Conductor', w: 42 }, { l: 'RUT', w: 28 }, { l: 'Destino', w: 50 }, { l: 'Hora', w: 32 }];
+
+    doc.setFillColor(...primary);
+    doc.rect(M, yPos, UW, 7, 'F');
+    let xc = M + 1;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    cols.forEach(c => { doc.text(c.l, xc, yPos + 4.5); xc += c.w; });
+    yPos += 7;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...primary);
+
+    hoyVisitas.forEach((v, idx) => {
+      if (yPos > 270) { doc.addPage(); yPos = 20; }
+      doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
+      doc.rect(M, yPos, UW, 6, 'F');
+
+      const data = [String(idx + 1), v.patente, v.conductor.slice(0, 20), v.rut, v.destino.slice(0, 24), v.hora];
+      xc = M + 1;
+      cols.forEach((c, ci) => {
+        doc.text(data[ci], xc, yPos + 4);
+        xc += c.w;
+      });
+      yPos += 6;
+    });
+
+    doc.save(`visitas_${today}.pdf`);
+  }
+
+  function sendWhatsappDaily() {
+    const number = localStorage.getItem('cd-whatsapp');
+    if (!number) {
+      showAlert('error', 'Configura tu número WhatsApp primero');
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const hoyVisitas = visits.filter(v => v.fecha === today);
+
+    if (!hoyVisitas.length) {
+      showAlert('error', 'Sin visitas para hoy');
+      return;
+    }
+
+    const [y, m, d] = today.split('-');
+    const fechaDisplay = `${d}/${m}/${y}`;
+
+    const mensaje = `Visitas acumuladas del ${fechaDisplay}:%0A%0ATotal: ${hoyVisitas.length} vehículos%0A%0A${hoyVisitas.map((v, i) => `${i + 1}. ${v.patente} - ${v.conductor || 'S/N'} (${v.hora})`).join('%0A')}%0A%0A📎 Ver PDF adjunto para más detalles.`;
+
+    const whatsappURL = `https://wa.me/${number}?text=${mensaje}`;
+    window.open(whatsappURL, '_blank');
+
+    setTimeout(() => {
+      exportPDFDaily();
+    }, 500);
+  }
+
   function deleteVisit(id) {
     deleteId = id;
     document.getElementById('modal-delete').classList.add('active');
@@ -1343,6 +1487,7 @@
 
   // ════════════════════ INIT ════════════════════
   loadData();
+  loadWhatsappNumber();
   setDateTime();
   updateStats();
 </script>
