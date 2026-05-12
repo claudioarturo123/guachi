@@ -52,61 +52,29 @@ main{max-width:760px;margin:0 auto;padding:20px 14px 100px}
 .cam-bloque{margin-bottom:18px}
 .cam-label{font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:7px}
 
-.cam-frame{
-  position:relative;
-  width:100%;
-  /* relación 16:9 horizontal */
-  aspect-ratio:16/7;
-  background:#0a0f1a;
-  border-radius:10px;
-  overflow:hidden;
-  border:2px solid var(--borde);
+/* Preview de foto tomada — horizontal */
+.foto-preview{
+  width:100%;aspect-ratio:16/7;
+  background:#0a0f1a;border-radius:10px;overflow:hidden;
+  border:2px solid var(--borde);display:none;position:relative;
 }
-.cam-frame video{
-  position:absolute;inset:0;
-  width:100%;height:100%;
-  object-fit:cover;
+.foto-preview img{width:100%;height:100%;object-fit:contain;background:#0a0f1a}
+.foto-preview-label{
+  position:absolute;bottom:6px;left:0;right:0;text-align:center;
+  font-size:11px;color:rgba(255,255,255,0.7);pointer-events:none;
 }
-/* guía visual de zona de patente */
-.cam-guia{
-  position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  width:72%;height:44%;
-  border:2.5px solid var(--acento);
-  border-radius:6px;
-  pointer-events:none;
-  box-shadow:0 0 0 2000px rgba(0,0,0,0.38);
-}
-.cam-guia::before,.cam-guia::after{
-  content:'';position:absolute;
-  width:14px;height:14px;
-  border-color:var(--acento);border-style:solid;
-}
-.cam-guia::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:3px 0 0 3px}
-.cam-guia::after{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 3px 3px 0}
-
-.cam-overlay-txt{
-  position:absolute;bottom:8px;left:0;right:0;
-  text-align:center;font-size:11px;color:rgba(255,255,255,0.75);
-  pointer-events:none;
-}
-.cam-off-msg{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  color:rgba(255,255,255,0.4);font-size:13px;
-}
-.cam-off-msg svg{width:36px;height:36px;stroke:rgba(255,255,255,0.25);fill:none;stroke-width:1.5}
 
 .cam-acciones{display:flex;gap:8px;margin-top:9px}
-.btn-cam{flex:1;height:42px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s}
-.btn-cam svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-cam{flex:1;height:44px;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .18s}
+.btn-cam svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn-abrir{background:var(--azul);color:#fff}
 .btn-abrir:active{background:var(--azul2)}
 .btn-capturar{background:var(--acento);color:#fff}
 .btn-capturar:active{background:#c8880e}
-.btn-cerrar-cam{background:var(--fondo);color:var(--txt2);border:1.5px solid var(--borde)}
-.btn-cerrar-cam:active{background:var(--borde)}
 .btn-cam:disabled{opacity:0.4;pointer-events:none}
+
+/* input file oculto */
+#input-foto{display:none}
 
 /* OCR resultado */
 .ocr-resultado{
@@ -289,45 +257,36 @@ input.autorel{border-color:var(--verde);background:#f0fdf6}
     <div class="cam-bloque">
       <div class="cam-label">📷 Leer patente con cámara</div>
 
-      <div class="cam-frame" id="cam-frame">
-        <video id="cam-video" autoplay playsinline muted></video>
-        <div class="cam-guia"></div>
-        <div class="cam-overlay-txt">Encuadra la patente dentro del recuadro</div>
-        <div class="cam-off-msg" id="cam-off">
-          <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Cámara apagada
-        </div>
+      <!-- Preview horizontal de la foto tomada -->
+      <div class="foto-preview" id="foto-preview">
+        <img id="foto-img" src="" alt="foto patente">
+        <div class="foto-preview-label">Foto capturada — analizando…</div>
       </div>
 
+      <!-- Input file oculto: abre cámara trasera en móvil -->
+      <input type="file" id="input-foto" accept="image/*" capture="environment" onchange="onFotoSeleccionada(this)">
+
       <div class="cam-acciones">
-        <button class="btn-cam btn-abrir" id="btn-abrir" onclick="abrirCamara()">
+        <button class="btn-cam btn-abrir" onclick="document.getElementById('input-foto').click()">
           <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          Abrir cámara
-        </button>
-        <button class="btn-cam btn-capturar" id="btn-capturar" onclick="capturarFoto()" disabled>
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          Capturar
-        </button>
-        <button class="btn-cam btn-cerrar-cam" id="btn-cerrar" onclick="cerrarCamara()" disabled>
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Cerrar
+          Tomar foto de la patente
         </button>
       </div>
 
       <!-- OCR loading -->
       <div class="ocr-cargando" id="ocr-cargando">
         <div class="spin"></div>
-        Analizando imagen...
+        Analizando imagen, espera un momento…
       </div>
 
       <!-- OCR resultado: chips seleccionables -->
       <div class="ocr-resultado" id="ocr-resultado">
         <div class="ocr-titulo">
           <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Patentes detectadas — toca la correcta o corrígela abajo
+          Texto detectado — toca el correcto o corrígelo abajo
         </div>
         <div class="ocr-chips" id="ocr-chips"></div>
-        <div class="ocr-hint">Si ninguna es correcta, escríbela manualmente en el campo Patente.</div>
+        <div class="ocr-hint">Si ninguno es correcto, escríbelo manualmente en el campo Patente.</div>
       </div>
     </div>
 
@@ -447,9 +406,6 @@ input.autorel{border-color:var(--verde);background:#f0fdf6}
   </div>
 </div>
 
-<!-- canvas oculto para capturar frame -->
-<canvas id="cam-canvas" style="display:none"></canvas>
-
 <script>
 /* ===================== STORAGE ===================== */
 const SK='rv_v3', SV='rv_veh_v3';
@@ -490,133 +446,148 @@ function iniciarDT(){
   document.getElementById('hora').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
 }
 
-/* ===================== CÁMARA ===================== */
-let stream=null;
+/* ===================== FOTO + OCR ===================== */
 
-async function abrirCamara(){
-  try{
-    stream=await navigator.mediaDevices.getUserMedia({
-      video:{
-        facingMode:{ideal:'environment'},
-        width:{ideal:1920},height:{ideal:1080}   // pide resolución horizontal
-      }
-    });
-    const vid=document.getElementById('cam-video');
-    vid.srcObject=stream;
-    document.getElementById('cam-off').style.display='none';
-    document.getElementById('btn-capturar').disabled=false;
-    document.getElementById('btn-cerrar').disabled=false;
-    document.getElementById('btn-abrir').disabled=true;
-  }catch(e){
-    alerta('err','No se pudo acceder a la cámara: '+e.message);
+function onFotoSeleccionada(inp) {
+  const file = inp.files[0];
+  if (!file) return;
+
+  // Mostrar preview horizontal
+  const preview = document.getElementById('foto-preview');
+  const img = document.getElementById('foto-img');
+  const url = URL.createObjectURL(file);
+  img.src = url;
+  preview.style.display = 'block';
+
+  // Leer como canvas y procesar
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const image = new Image();
+    image.onload = function() {
+      procesarImagen(image);
+    };
+    image.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+
+  // reset input para poder volver a seleccionar la misma foto
+  inp.value = '';
+}
+
+function procesarImagen(img) {
+  // Crear canvas con la imagen a tamaño manejable
+  const MAX = 1200;
+  let w = img.width, h = img.height;
+  if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+
+  // Preprocesamiento suave: escala de grises + aumento de contraste
+  // NO umbral duro — eso destruía el texto
+  const id = ctx.getImageData(0, 0, w, h);
+  const px = id.data;
+  for (let i = 0; i < px.length; i += 4) {
+    // Escala de grises
+    const g = 0.299 * px[i] + 0.587 * px[i+1] + 0.114 * px[i+2];
+    // Contraste aumentado (factor 1.8, punto medio 128)
+    const c = Math.min(255, Math.max(0, 1.8 * (g - 128) + 128));
+    px[i] = px[i+1] = px[i+2] = c;
   }
+  ctx.putImageData(id, 0, 0);
+
+  procesarOCR(canvas);
 }
 
-function cerrarCamara(){
-  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-  const vid=document.getElementById('cam-video');
-  vid.srcObject=null;
-  document.getElementById('cam-off').style.display='flex';
-  document.getElementById('btn-capturar').disabled=true;
-  document.getElementById('btn-cerrar').disabled=true;
-  document.getElementById('btn-abrir').disabled=false;
-}
-
-async function capturarFoto(){
-  const vid=document.getElementById('cam-video');
-  const canvas=document.getElementById('cam-canvas');
-
-  // captura en resolución real del video
-  canvas.width=vid.videoWidth||640;
-  canvas.height=vid.videoHeight||360;
-  const ctx=canvas.getContext('2d');
-  ctx.drawImage(vid,0,0,canvas.width,canvas.height);
-
-  // Recortar zona central (donde está la guía)
-  // La guía ocupa 72% ancho x 44% alto centrada
-  const cx=canvas.width*0.14, cy=canvas.height*0.28,
-        cw=canvas.width*0.72, ch=canvas.height*0.44;
-  const crop=document.createElement('canvas');
-  crop.width=cw; crop.height=ch;
-  crop.getContext('2d').drawImage(canvas,cx,cy,cw,ch,0,0,cw,ch);
-
-  // Pre-procesar: aumentar contraste para OCR
-  const ic=crop.getContext('2d');
-  const id=ic.getImageData(0,0,cw,ch);
-  const px=id.data;
-  for(let i=0;i<px.length;i+=4){
-    // escala de grises
-    const g=0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];
-    // umbral adaptativo simple
-    const v=g>128?255:0;
-    px[i]=px[i+1]=px[i+2]=v;
-  }
-  ic.putImageData(id,0,0);
-
-  await procesarOCR(crop);
-}
-
-/* ===================== OCR con Tesseract ===================== */
-async function procesarOCR(canvas){
-  const cargando=document.getElementById('ocr-cargando');
-  const resultado=document.getElementById('ocr-resultado');
-  const chips=document.getElementById('ocr-chips');
+async function procesarOCR(canvas) {
+  const cargando = document.getElementById('ocr-cargando');
+  const resultado = document.getElementById('ocr-resultado');
+  const chips = document.getElementById('ocr-chips');
 
   cargando.classList.add('visible');
   resultado.classList.remove('visible');
 
-  try{
-    const {createWorker}=Tesseract;
-    const worker=await createWorker('eng',1,{
-      workerPath:'https://unpkg.com/tesseract.js@5/dist/worker.min.js',
-      langPath:'https://tessdata.projectnaptha.com/4.0.0',
-      corePath:'https://unpkg.com/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js',
-      logger:()=>{}
+  try {
+    await cargarTesseract();
+
+    const { createWorker } = Tesseract;
+    const worker = await createWorker('spa', 1, {
+      workerPath: 'https://unpkg.com/tesseract.js@5/dist/worker.min.js',
+      langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+      corePath: 'https://unpkg.com/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js',
+      logger: () => {}
     });
+
+    // Configurar para texto de patente: solo alfanuméricos, línea simple
     await worker.setParameters({
-      tessedit_char_whitelist:'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      tessedit_pageseg_mode:'7',  // línea única
+      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+      tessedit_pageseg_mode: '6',   // bloque uniforme de texto
     });
-    const {data:{text}}=await worker.recognize(canvas);
+
+    const { data: { text, words } } = await worker.recognize(canvas);
     await worker.terminate();
 
-    // Extraer candidatos: tokens de 4-8 chars alfanuméricos
-    const tokens=(text.match(/[A-Z0-9]{4,8}/g)||[])
-      .map(t=>t.replace(/[^A-Z0-9]/g,''))
-      .filter(t=>t.length>=4)
-      .filter((v,i,a)=>a.indexOf(v)===i)
-      .slice(0,5);
+    // Extraer candidatos desde palabras individuales con confianza + texto completo
+    const candidatos = new Set();
+
+    // 1) Palabras individuales con confianza > 40
+    if (words) {
+      words
+        .filter(w => w.confidence > 40)
+        .map(w => w.text.replace(/[^A-Z0-9]/g, ''))
+        .filter(t => t.length >= 4 && t.length <= 8)
+        .forEach(t => candidatos.add(t));
+    }
+
+    // 2) Tokens del texto completo
+    (text.replace(/[^A-Z0-9\s]/g, ' ').match(/[A-Z0-9]{4,8}/g) || [])
+      .forEach(t => candidatos.add(t));
+
+    // 3) Texto completo sin espacios si tiene entre 4-8 chars
+    const limpio = text.replace(/[^A-Z0-9]/g, '');
+    if (limpio.length >= 4 && limpio.length <= 8) candidatos.add(limpio);
+    // también subcadenas útiles
+    if (limpio.length > 8) {
+      for (let s = 0; s <= limpio.length - 6; s++) {
+        candidatos.add(limpio.substring(s, s + 6));
+      }
+    }
 
     cargando.classList.remove('visible');
 
-    if(tokens.length===0){
+    const lista = [...candidatos].slice(0, 6);
+
+    if (lista.length === 0) {
       resultado.classList.add('visible');
-      chips.innerHTML='<span style="font-size:13px;color:var(--txt2)">No se detectó texto claro. Intenta de nuevo o escribe la patente manualmente.</span>';
+      chips.innerHTML = `<span style="font-size:13px;color:var(--txt2)">
+        No se detectó texto claro. Intenta con mejor iluminación o escríbela manualmente.
+      </span>`;
       return;
     }
 
-    chips.innerHTML=tokens.map(t=>`
+    chips.innerHTML = lista.map(t => `
       <div class="ocr-chip" onclick="seleccionarChip('${t}',this)">
         ${t}
         <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       </div>`).join('');
     resultado.classList.add('visible');
 
-  }catch(e){
+  } catch (e) {
     cargando.classList.remove('visible');
-    alerta('err','Error al procesar imagen. Escribe la patente manualmente.');
+    alerta('err', 'Error al analizar la imagen. Escribe la patente manualmente.');
+    console.error(e);
   }
 }
 
-function seleccionarChip(texto, el){
-  document.querySelectorAll('.ocr-chip').forEach(c=>c.classList.remove('sel'));
+function seleccionarChip(texto, el) {
+  document.querySelectorAll('.ocr-chip').forEach(c => c.classList.remove('sel'));
   el.classList.add('sel');
-  const inp=document.getElementById('patente');
-  inp.value=texto;
+  const inp = document.getElementById('patente');
+  inp.value = texto;
   onPatente(inp);
-  // cerrar cámara automáticamente y hacer foco en destino
-  cerrarCamara();
-  setTimeout(()=>document.getElementById('destino').focus(),300);
+  setTimeout(() => document.getElementById('destino').focus(), 300);
 }
 
 /* ===================== AUTOCOMPLETE PATENTE ===================== */
@@ -888,25 +859,18 @@ function exportarPDF(){
   doc.save(`visitas_${now.toISOString().split('T')[0]}.pdf`);
 }
 
-/* ===================== INIT ===================== */
-// Tesseract se carga bajo demanda para no ralentizar el inicio
+/* ===================== TESSERACT LAZY LOAD ===================== */
 function cargarTesseract(){
   return new Promise((res,rej)=>{
     if(window.Tesseract){res();return;}
     const s=document.createElement('script');
     s.src='https://unpkg.com/tesseract.js@5/dist/tesseract.min.js';
-    s.onload=res;s.onerror=rej;
+    s.onload=res; s.onerror=rej;
     document.head.appendChild(s);
   });
 }
 
-// Sobreescribir procesarOCR para cargar Tesseract primero
-const _procesarOCR=procesarOCR;
-window.procesarOCR=async function(canvas){
-  try{await cargarTesseract();}catch(e){alerta('err','No se pudo cargar el motor OCR.');return;}
-  await _procesarOCR(canvas);
-};
-
+/* ===================== INIT ===================== */
 cargar();
 iniciarDT();
 actualizarStats();
