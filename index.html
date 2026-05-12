@@ -137,8 +137,8 @@ input.autorel{border-color:var(--verde);background:#f0fdf6}
 
 /* ALERTAS */
 .alerta{display:none;align-items:center;gap:8px;padding:10px 13px;border-radius:8px;font-size:13px;font-weight:500;margin-top:10px}
-.alerta.ok{background:var(--verde-f);color:var(--verde);border:1px solid #a8e0c4;display:flex}
-.alerta.err{background:var(--rojo-f);color:var(--rojo);border:1px solid #f0b8b4;display:flex}
+.alerta.ok{background:var(--verde-f);color:var(--verde);border:1px solid #a8e0c4}
+.alerta.err{background:var(--rojo-f);color:var(--rojo);border:1px solid #f0b8b4}
 .alerta svg{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2}
 
 /* STATS */
@@ -296,7 +296,8 @@ input.autorel{border-color:var(--verde);background:#f0fdf6}
         <label>Patente del vehículo</label>
         <input type="text" id="patente" placeholder="Ej: ABCD12" maxlength="8"
           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
-          oninput="onPatente(this)" onfocus="onPatenteFocus()" onblur="ocultarAC()">
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'');onPatente(this)"
+          onfocus="onPatenteFocus()" onblur="ocultarAC()">
         <div class="ac-drop" id="ac-drop"></div>
       </div>
 
@@ -529,37 +530,51 @@ async function procesarOCR(canvas) {
     const { data: { text, words } } = await worker.recognize(canvas);
     await worker.terminate();
 
-    // Extraer candidatos desde palabras individuales con confianza + texto completo
-    const candidatos = new Set();
+    // Formatos válidos de patente chilena:
+    // Antigua: 2 letras + 4 números (ej: GK7834) → poco común
+    // Nueva:   4 letras + 2 números (ej: GKSB78)
+    // Con puntos/guiones que el OCR puede incluir
+    const esPatente = t => /^[A-Z]{4}[0-9]{2}$/.test(t) || /^[A-Z]{2}[0-9]{4}$/.test(t);
 
-    // 1) Palabras individuales con confianza > 40
-    if (words) {
-      words
-        .filter(w => w.confidence > 40)
-        .map(w => w.text.replace(/[^A-Z0-9]/g, ''))
-        .filter(t => t.length >= 4 && t.length <= 8)
-        .forEach(t => candidatos.add(t));
+    const candidatos = new Map(); // texto → score
+
+    const agregar = (t, score) => {
+      t = t.replace(/[^A-Z0-9]/g,'').toUpperCase();
+      if(t.length < 4 || t.length > 8) return;
+      candidatos.set(t, Math.max(candidatos.get(t)||0, score));
+    };
+
+    // 1) Palabras con confianza alta
+    if(words) {
+      words.forEach(w => {
+        const clean = w.text.replace(/[^A-Z0-9]/g,'');
+        if(clean.length >= 4 && clean.length <= 8) {
+          const score = w.confidence + (esPatente(clean) ? 200 : 0);
+          agregar(clean, score);
+        }
+      });
     }
 
-    // 2) Tokens del texto completo
-    (text.replace(/[^A-Z0-9\s]/g, ' ').match(/[A-Z0-9]{4,8}/g) || [])
-      .forEach(t => candidatos.add(t));
+    // 2) Texto completo — extraer tokens
+    const fullClean = text.toUpperCase().replace(/[^A-Z0-9\s\-\.]/g,' ');
+    (fullClean.match(/[A-Z0-9]{4,8}/g)||[]).forEach(t => agregar(t, esPatente(t)?150:50));
 
-    // 3) Texto completo sin espacios si tiene entre 4-8 chars
-    const limpio = text.replace(/[^A-Z0-9]/g, '');
-    if (limpio.length >= 4 && limpio.length <= 8) candidatos.add(limpio);
-    // también subcadenas útiles
-    if (limpio.length > 8) {
-      for (let s = 0; s <= limpio.length - 6; s++) {
-        candidatos.add(limpio.substring(s, s + 6));
-      }
+    // 3) Texto completo sin separadores — subcadenas de 6 chars (formato más común)
+    const sinEsp = text.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    for(let i=0; i<=sinEsp.length-6; i++) {
+      const sub = sinEsp.substring(i, i+6);
+      agregar(sub, esPatente(sub) ? 180 : 30);
     }
 
     cargando.classList.remove('visible');
 
-    const lista = [...candidatos].slice(0, 6);
+    // Ordenar: primero los que parecen patente, luego por score
+    const lista = [...candidatos.entries()]
+      .sort((a,b) => b[1]-a[1])
+      .map(([t])=>t)
+      .slice(0,5);
 
-    if (lista.length === 0) {
+    if(lista.length === 0) {
       resultado.classList.add('visible');
       chips.innerHTML = `<span style="font-size:13px;color:var(--txt2)">
         No se detectó texto claro. Intenta con mejor iluminación o escríbela manualmente.
@@ -594,7 +609,6 @@ function seleccionarChip(texto, el) {
 let acTimer=null;
 
 function onPatente(inp){
-  inp.value=fmtPat(inp.value);
   const val=inp.value;
   limpiarBadge();
   if(!val){ocultarAC();return;}
@@ -680,11 +694,14 @@ function registrar(){
 }
 
 function alerta(tipo,txt){
-  ['ok','err'].forEach(t=>document.getElementById('al-'+t).style.display='none');
+  ['ok','err'].forEach(t=>{
+    const e=document.getElementById('al-'+t);
+    e.style.display='none';
+  });
   const el=document.getElementById('al-'+tipo);
   document.getElementById(tipo==='ok'?'ok-txt':'err-txt').textContent=txt;
   el.style.display='flex';
-  setTimeout(()=>el.style.display='none',3500);
+  setTimeout(()=>{ el.style.display='none'; },3500);
 }
 
 /* ===================== STATS ===================== */
