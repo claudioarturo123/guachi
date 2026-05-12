@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0f172a">
 <title>Centro de Distribución - Registro de Visitas</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+<script async src="https://unpkg.com/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -16,7 +16,6 @@
   :root {
     --primary: #0f172a;
     --primary-light: #1a2541;
-    --primary-lighter: #2a3d5c;
     --accent: #ff6b35;
     --accent-light: #ff8555;
     --success: #10a37f;
@@ -28,13 +27,12 @@
     --text-secondary: #6b7280;
     --text-tertiary: #9ca3af;
     --border: #e5e7eb;
-    --border-light: #f3f4f6;
   }
 
   html, body {
     height: 100%;
     background: var(--surface-secondary);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Inter', sans-serif;
     color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
@@ -44,11 +42,11 @@
   header {
     background: var(--primary);
     color: white;
-    padding: 18px 20px;
+    padding: 16px 20px;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
   }
 
   .header-content {
@@ -60,114 +58,96 @@
   }
 
   .logo-box {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 20px;
+    font-size: 18px;
+  }
+
+  .header-text h1 { font-size: 15px; font-weight: 700; }
+  .header-text p { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+
+  /* ════════════════════ TABS ════════════════════ */
+  .tabs {
+    background: var(--primary);
+    padding: 0 20px 12px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
     flex-shrink: 0;
-  }
-
-  .header-text h1 {
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-  }
-
-  .header-text p {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 2px;
-  }
-
-  .header-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 10px;
-  }
-
-  .btn-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 8px 14px;
+    height: 36px;
+    padding: 0 16px;
+    border: none;
     border-radius: 6px;
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s;
   }
 
-  .btn-header:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  .btn-header:active {
-    transform: scale(0.96);
+  .tab.active {
+    background: white;
+    color: var(--primary);
   }
 
   /* ════════════════════ MAIN ════════════════════ */
   main {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
-    padding: 24px 16px 120px;
+    padding: 20px 16px 120px;
   }
+
+  .section { display: none; }
+  .section.active { display: block; }
 
   /* ════════════════════ CARD ════════════════════ */
   .card {
-    background: var(--surface);
+    background: white;
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 28px 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
   .card-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
 
   .card-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
-    border-radius: 10px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 20px;
-    flex-shrink: 0;
+    font-size: 18px;
   }
 
-  .card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .card-subtitle {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-top: 2px;
-  }
+  .card-title { font-size: 15px; font-weight: 700; }
 
   /* ════════════════════ FORM ════════════════════ */
   .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 14px;
+    margin-bottom: 16px;
   }
 
   @media (max-width: 640px) {
@@ -177,114 +157,78 @@
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
     position: relative;
   }
 
   .form-group.full { grid-column: 1 / -1; }
 
-  .form-group label {
+  label {
     font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
   }
 
-  .form-group.optional::after {
-    content: "Opcional";
-    font-size: 11px;
-    color: var(--text-tertiary);
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: normal;
-    margin-left: auto;
-  }
-
-  input, textarea {
-    height: 44px;
-    padding: 0 14px;
+  input, textarea, select {
+    height: 42px;
+    padding: 0 12px;
     border: 1.5px solid var(--border);
     border-radius: 8px;
     font-family: 'Inter', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     color: var(--text-primary);
     background: var(--surface-secondary);
     transition: all 0.2s;
     -webkit-appearance: none;
-    appearance: none;
     outline: none;
   }
 
   textarea {
     height: auto;
-    min-height: 44px;
-    padding: 12px 14px;
+    min-height: 42px;
+    padding: 10px 12px;
     resize: none;
   }
 
-  input:focus, textarea:focus {
+  input:focus, textarea:focus, select:focus {
     border-color: var(--accent);
     background: white;
     box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
   }
 
-  input::placeholder, textarea::placeholder {
-    color: var(--text-tertiary);
-  }
-
   input.error {
     border-color: var(--danger);
-    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.08);
   }
 
-  /* ════════════════════ CAMERA ════════════════════ */
-  .camera-group {
+  .input-group {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     align-items: flex-end;
   }
 
-  .camera-group input {
-    flex: 1;
-  }
+  .input-group input { flex: 1; }
 
   .btn-camera {
-    height: 44px;
-    padding: 0 16px;
+    height: 42px;
+    padding: 0 14px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
     white-space: nowrap;
-    flex-shrink: 0;
+    transition: all 0.2s;
   }
 
-  .btn-camera:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-  }
-
-  .btn-camera:active {
-    transform: scale(0.96);
-  }
-
-  .btn-camera.loading {
-    opacity: 0.7;
-    pointer-events: none;
-  }
+  .btn-camera:hover { transform: translateY(-1px); }
+  .btn-camera:active { transform: scale(0.96); }
 
   /* ════════════════════ AUTOCOMPLETE ════════════════════ */
-  .autocomplete-wrapper {
-    position: relative;
-  }
+  .autocomplete-wrapper { position: relative; }
 
   .dropdown {
     position: absolute;
@@ -294,96 +238,93 @@
     background: white;
     border: 1.5px solid var(--border);
     border-radius: 8px;
-    max-height: 220px;
+    max-height: 200px;
     overflow-y: auto;
     z-index: 50;
     display: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
-  .dropdown.active {
-    display: block;
-  }
+  .dropdown.active { display: block; }
 
   .dropdown-item {
-    padding: 12px 14px;
+    padding: 10px 12px;
     cursor: pointer;
-    border-bottom: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border);
     transition: background 0.15s;
   }
 
-  .dropdown-item:last-child {
-    border-bottom: none;
-  }
-
-  .dropdown-item:hover {
-    background: var(--surface-secondary);
-  }
+  .dropdown-item:last-child { border-bottom: none; }
+  .dropdown-item:hover { background: var(--surface-secondary); }
 
   .dropdown-plate {
     font-weight: 700;
     color: var(--accent);
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
+    font-size: 13px;
   }
 
   .dropdown-name {
-    font-size: 13px;
-    color: var(--text-primary);
-    margin-top: 2px;
-  }
-
-  .dropdown-rut {
     font-size: 12px;
-    color: var(--text-tertiary);
+    color: var(--text-primary);
+    margin-top: 1px;
   }
 
   /* ════════════════════ BUTTONS ════════════════════ */
   .btn-primary {
     width: 100%;
-    height: 48px;
+    height: 44px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
+    margin-top: 6px;
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); }
+
+  .btn-secondary {
+    padding: 8px 14px;
+    background: var(--surface-secondary);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 8px;
-    letter-spacing: -0.3px;
   }
 
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(255, 107, 53, 0.3);
+  .btn-secondary:hover { background: white; }
+
+  .btn-small {
+    height: 32px;
+    padding: 0 10px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
 
-  .btn-primary:active {
-    transform: scale(0.98);
+  .btn-small:hover { background: white; }
+
+  .btn-danger {
+    background: rgba(211, 47, 47, 0.08);
+    color: var(--danger);
+    border: 1px solid rgba(211, 47, 47, 0.2);
   }
 
   /* ════════════════════ ALERTS ════════════════════ */
   .alert {
     display: none;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border-radius: 8px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    margin-top: 16px;
-    align-items: center;
-    gap: 10px;
-    animation: slideIn 0.3s ease-out;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
+    margin-top: 10px;
   }
 
   .alert.success {
@@ -400,19 +341,12 @@
     display: flex;
   }
 
-  .alert.warning {
-    background: rgba(245, 158, 11, 0.08);
-    color: var(--warning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
-    display: flex;
-  }
-
   /* ════════════════════ STATS ════════════════════ */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
   }
 
   @media (max-width: 640px) {
@@ -420,194 +354,154 @@
   }
 
   .stat-card {
-    background: var(--surface);
+    background: white;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
+    border-radius: 10px;
+    padding: 14px;
     text-align: center;
-    transition: all 0.2s;
-  }
-
-  .stat-card:hover {
-    border-color: var(--accent);
-    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.1);
   }
 
   .stat-number {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: 800;
     color: var(--accent);
-    line-height: 1;
   }
 
   .stat-label {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-secondary);
-    margin-top: 8px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
+    margin-top: 4px;
     font-weight: 600;
   }
 
   /* ════════════════════ LIST ════════════════════ */
   .list-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
+    align-items: center;
+    margin-bottom: 12px;
   }
 
-  .list-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-
-  .list-count {
-    font-size: 12px;
-    color: var(--text-tertiary);
-    background: var(--surface-secondary);
-    padding: 4px 10px;
-    border-radius: 6px;
-  }
+  .list-title { font-size: 14px; font-weight: 700; }
+  .list-count { font-size: 12px; color: var(--text-secondary); }
 
   .search-box {
     position: relative;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
 
   .search-icon {
     position: absolute;
-    left: 14px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-tertiary);
-    font-size: 16px;
+    font-size: 14px;
     pointer-events: none;
   }
 
-  #search {
-    padding-left: 40px;
+  #search-historial {
+    padding-left: 36px;
     width: 100%;
   }
 
-  #list {
+  #list-historial, #list-recurrentes, #list-pordia {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
 
   .list-item {
-    background: var(--surface);
+    background: white;
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 14px;
+    padding: 12px;
     display: grid;
-    grid-template-columns: 44px 1fr auto;
-    gap: 12px;
+    grid-template-columns: 36px 1fr auto;
+    gap: 10px;
     align-items: center;
-    transition: all 0.2s;
-  }
-
-  .list-item:hover {
-    border-color: var(--accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .item-number {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 800;
-    font-size: 16px;
-    flex-shrink: 0;
+    font-size: 13px;
   }
 
-  .item-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
+  .item-info { display: flex; flex-direction: column; gap: 2px; }
 
   .item-plate {
     font-weight: 800;
     color: var(--accent);
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
-    letter-spacing: 1px;
+    font-size: 13px;
   }
 
   .item-name {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text-primary);
   }
 
   .item-meta {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-tertiary);
   }
 
-  .item-meta-missing {
-    color: var(--warning);
-    font-weight: 500;
-  }
-
-  .item-time {
+  .item-actions {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-  }
-
-  .item-date {
-    font-weight: 600;
-    color: var(--accent);
-    font-size: 12px;
-  }
-
-  .item-hour {
-    font-size: 12px;
-    color: var(--text-tertiary);
-  }
-
-  .btn-delete {
-    width: 36px;
-    height: 36px;
-    background: rgba(211, 47, 47, 0.08);
-    border: none;
-    border-radius: 6px;
-    color: var(--danger);
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-  }
-
-  .btn-delete:hover {
-    background: rgba(211, 47, 47, 0.12);
+    gap: 6px;
   }
 
   .empty {
     text-align: center;
-    padding: 60px 20px;
+    padding: 40px 20px;
     color: var(--text-tertiary);
   }
 
-  .empty-icon {
-    font-size: 48px;
-    margin-bottom: 12px;
-    opacity: 0.5;
+  /* ════════════════════ CONTACTS ════════════════════ */
+  .contact-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    align-items: center;
   }
 
-  /* ════════════════════ MODAL ════════════════════ */
+  .contact-info { display: flex; flex-direction: column; gap: 2px; }
+
+  .contact-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .contact-rut {
+    font-size: 11px;
+    color: var(--text-tertiary);
+  }
+
+  .contact-actions {
+    display: flex;
+    gap: 6px;
+  }
+
+  #list-contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* ════════════════════ MODALS ════════════════════ */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -615,66 +509,34 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0,0,0,0.5);
     z-index: 200;
     align-items: center;
     justify-content: center;
     padding: 20px;
   }
 
-  .modal-overlay.active {
-    display: flex;
-  }
+  .modal-overlay.active { display: flex; }
 
   .modal {
     background: white;
     border-radius: 12px;
-    padding: 28px;
+    padding: 24px;
     max-width: 400px;
     width: 100%;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
   }
 
   .modal-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 8px;
-  }
-
-  .modal-text {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
   .modal-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .btn-modal {
-    height: 40px;
-    border: 1.5px solid var(--border);
-    background: white;
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .btn-modal.danger {
-    background: var(--danger);
-    color: white;
-    border-color: var(--danger);
-  }
-
-  .btn-modal.danger:hover {
-    box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
   }
 
   /* ════════════════════ CAMERA MODAL ════════════════════ */
@@ -690,33 +552,31 @@
     flex-direction: column;
   }
 
-  .camera-overlay.active {
-    display: flex;
-  }
+  .camera-overlay.active { display: flex; }
 
   .camera-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
 
   .camera-title {
     color: white;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .btn-close {
-    width: 36px;
-    height: 36px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 32px;
+    height: 32px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
     color: white;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -728,66 +588,56 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    gap: 20px;
+    padding: 16px;
+    gap: 16px;
   }
 
   #video {
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
     height: auto;
-    border-radius: 12px;
-    background: black;
-    object-fit: cover;
+    border-radius: 10px;
+    background: #000;
   }
 
   #canvas { display: none; }
 
   .camera-controls {
     display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 10px;
   }
 
   .btn-camera-action {
-    height: 48px;
-    padding: 0 24px;
+    height: 42px;
+    padding: 0 20px;
     background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
   }
 
   .camera-status {
-    color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    font-size: 13px;
+    color: rgba(255,255,255,0.8);
+    font-size: 12px;
   }
 
   /* ════════════════════ FOOTER ════════════════════ */
   footer {
     background: var(--primary);
-    color: rgba(255, 255, 255, 0.6);
-    padding: 24px 20px;
+    color: rgba(255,255,255,0.6);
+    padding: 16px 20px;
     text-align: center;
-    font-size: 12px;
-    margin-top: 40px;
+    font-size: 11px;
+    margin-top: 30px;
   }
 
-  /* ════════════════════ RESPONSIVE ════════════════════ */
   @media (max-width: 640px) {
     main { padding: 16px; }
-    .card { padding: 20px; }
+    .card { padding: 16px; }
     .list-item { grid-template-columns: 1fr; }
-    .item-time { align-items: flex-start; }
-    .header-text p { display: none; }
-    .camera-group { flex-direction: column; }
-    .camera-group .btn-camera { width: 100%; }
   }
 </style>
 </head>
@@ -798,112 +648,198 @@
     <div class="logo-box">CD</div>
     <div class="header-text">
       <h1>Centro de Distribución</h1>
-      <p>Sistema de registro de visitas</p>
-    </div>
-    <div class="header-actions">
-      <button class="btn-header" onclick="exportPDF()">
-        📄 PDF
-      </button>
+      <p>Registro de visitas</p>
     </div>
   </div>
 </header>
 
+<div class="tabs">
+  <button class="tab active" onclick="switchTab(event, 'registro')">📝 Registro</button>
+  <button class="tab" onclick="switchTab(event, 'historial')">📋 Historial</button>
+  <button class="tab" onclick="switchTab(event, 'recurrentes')">🔄 Recurrentes</button>
+  <button class="tab" onclick="switchTab(event, 'pordia')">📅 Por Día</button>
+  <button class="tab" onclick="switchTab(event, 'contactos')">👥 Contactos</button>
+  <button class="tab" onclick="switchTab(event, 'exportar')">📤 Exportar</button>
+</div>
+
 <main>
 
-  <!-- FORMULARIO -->
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">🚗</div>
-      <div>
-        <div class="card-title">Registrar visita</div>
-        <div class="card-subtitle">Ingresa los datos del vehículo</div>
-      </div>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-group full autocomplete-wrapper">
-        <label>Patente</label>
-        <div class="camera-group">
-          <input type="text" id="patente" placeholder="Ej: AB-CD-01" autocomplete="off">
-          <button class="btn-camera" onclick="openCamera()" id="btnCamera">📷 Escanear</button>
+  <!-- SECCIÓN REGISTRO -->
+  <section id="registro" class="section active">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">🚗</div>
+        <div>
+          <div class="card-title">Registrar visita</div>
         </div>
-        <div class="dropdown" id="dropdown"></div>
       </div>
 
-      <div class="form-group optional">
-        <label>RUT Conductor</label>
-        <input type="text" id="rut" placeholder="Ej: 12.345.678-9">
+      <div class="form-grid">
+        <div class="form-group full autocomplete-wrapper">
+          <label>Patente</label>
+          <div class="input-group">
+            <input type="text" id="patente" placeholder="AB-CD-01" autocomplete="off">
+            <button class="btn-camera" onclick="openCamera()">📷</button>
+          </div>
+          <div class="dropdown" id="dropdown"></div>
+        </div>
+
+        <div class="form-group">
+          <label>Conductor (opcional)</label>
+          <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label>RUT (opcional)</label>
+          <input type="text" id="rut" placeholder="12.345.678-9">
+        </div>
+
+        <div class="form-group">
+          <label>Fecha</label>
+          <input type="date" id="fecha">
+        </div>
+
+        <div class="form-group full">
+          <label>Destino</label>
+          <input type="text" id="destino" placeholder="Ubicación">
+        </div>
+
+        <div class="form-group">
+          <label>Hora</label>
+          <input type="time" id="hora">
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>Conductor</label>
-        <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
-      </div>
+      <button class="btn-primary" onclick="registerVisit()">✓ Registrar</button>
+      <div class="alert" id="alert"></div>
+    </div>
 
-      <div class="form-group">
-        <label>Fecha</label>
-        <input type="date" id="fecha">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-total">0</div>
+        <div class="stat-label">Total</div>
       </div>
-
-      <div class="form-group full">
-        <label>Destino</label>
-        <input type="text" id="destino" placeholder="Ubicación o destino">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-today">0</div>
+        <div class="stat-label">Hoy</div>
       </div>
-
-      <div class="form-group">
-        <label>Hora</label>
-        <input type="time" id="hora">
+      <div class="stat-card">
+        <div class="stat-number" id="stat-week">0</div>
+        <div class="stat-label">Semana</div>
       </div>
     </div>
+  </section>
 
-    <button class="btn-primary" onclick="registerVisit()">
-      ✓ Registrar visita
-    </button>
+  <!-- SECCIÓN HISTORIAL -->
+  <section id="historial" class="section">
+    <div class="card">
+      <div class="list-header">
+        <div class="list-title">Historial de visitas</div>
+        <div class="list-count" id="count-historial">0</div>
+      </div>
 
-    <div class="alert" id="alert"></div>
-  </div>
+      <div class="search-box">
+        <div class="search-icon">🔍</div>
+        <input type="text" id="search-historial" placeholder="Buscar..." onkeyup="renderHistorial()">
+      </div>
 
-  <!-- ESTADÍSTICAS -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-number" id="stat-total">0</div>
-      <div class="stat-label">Total visitas</div>
+      <div id="list-historial"></div>
     </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-today">0</div>
-      <div class="stat-label">Hoy</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-number" id="stat-week">0</div>
-      <div class="stat-label">Esta semana</div>
-    </div>
-  </div>
+  </section>
 
-  <!-- HISTORIAL -->
-  <div class="card">
-    <div class="list-header">
-      <div class="list-title">Historial de visitas</div>
-      <div class="list-count" id="list-count">0</div>
+  <!-- SECCIÓN RECURRENTES -->
+  <section id="recurrentes" class="section">
+    <div class="card">
+      <div class="list-header">
+        <div class="list-title">Vehículos recurrentes</div>
+        <div class="list-count" id="count-recurrentes">0</div>
+      </div>
+
+      <div id="list-recurrentes"></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN POR DÍA -->
+  <section id="pordia" class="section">
+    <div class="card">
+      <div class="list-header">
+        <div class="list-title">Visitas por día</div>
+        <div class="list-count" id="count-pordia">0</div>
+      </div>
+
+      <div id="list-pordia"></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN CONTACTOS -->
+  <section id="contactos" class="section">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">➕</div>
+        <div class="card-title">Agregar contacto</div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Nombre</label>
+          <input type="text" id="contact-name" placeholder="Nombre del conductor">
+        </div>
+
+        <div class="form-group">
+          <label>RUT</label>
+          <input type="text" id="contact-rut" placeholder="12.345.678-9">
+        </div>
+
+        <div class="form-group">
+          <label>Empresa</label>
+          <input type="text" id="contact-empresa" placeholder="Empresa">
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="addContact()">➕ Agregar contacto</button>
+      <div class="alert" id="alert-contact"></div>
     </div>
 
-    <div class="search-box">
-      <div class="search-icon">🔍</div>
-      <input type="text" id="search" placeholder="Buscar patente, conductor, RUT...">
-    </div>
+    <div class="card">
+      <div class="list-header">
+        <div class="list-title">Contactos guardados</div>
+        <div class="list-count" id="count-contacts">0</div>
+      </div>
 
-    <div id="list"></div>
-  </div>
+      <div id="list-contacts"></div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN EXPORTAR -->
+  <section id="exportar" class="section">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">📤</div>
+        <div class="card-title">Opciones de exportación</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <button class="btn-secondary" onclick="exportPDF()">📄 PDF - Reporte completo</button>
+        <button class="btn-secondary" onclick="exportCSV()">📊 CSV - Hoja de cálculo</button>
+        <button class="btn-secondary" onclick="exportJSON()">📋 JSON - Datos brutos</button>
+        <button class="btn-secondary" onclick="importData()">📥 Importar datos</button>
+        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="processImport()">
+      </div>
+    </div>
+  </section>
 
 </main>
 
 <!-- MODAL ELIMINAR -->
 <div class="modal-overlay" id="modal-delete">
   <div class="modal">
-    <div class="modal-title">¿Eliminar este registro?</div>
-    <div class="modal-text">Esta acción no se puede deshacer. Se eliminará el registro permanentemente.</div>
+    <div class="modal-title">¿Eliminar?</div>
+    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+      Esta acción no se puede deshacer.
+    </div>
     <div class="modal-actions">
-      <button class="btn-modal" onclick="closeModal()">Cancelar</button>
-      <button class="btn-modal danger" onclick="confirmDelete()">Eliminar</button>
+      <button class="btn-secondary" onclick="closeModal()" style="flex: 1;">Cancelar</button>
+      <button class="btn-secondary btn-danger" onclick="confirmDelete()" style="flex: 1;">Eliminar</button>
     </div>
   </div>
 </div>
@@ -911,114 +847,72 @@
 <!-- MODAL CÁMARA -->
 <div class="camera-overlay" id="camera-overlay">
   <div class="camera-header">
-    <div class="camera-title">📷 Escanear matrícula</div>
+    <div class="camera-title">Escanear matrícula</div>
     <button class="btn-close" onclick="closeCamera()">✕</button>
   </div>
   <div class="camera-body">
-    <video id="video" playsinline></video>
+    <video id="video" playsinline autoplay muted></video>
     <canvas id="canvas"></canvas>
     <div class="camera-controls">
-      <button class="btn-camera-action" onclick="capturePhoto()">📸 Capturar</button>
+      <button class="btn-camera-action" onclick="capturePhoto()">Capturar</button>
     </div>
     <div class="camera-status" id="camera-status">Apunta a la matrícula</div>
   </div>
 </div>
 
-<footer>
-  © 2024 Centro de Distribución | Sistema de registro de visitas v3.0
-</footer>
+<footer>© 2024 Centro de Distribución | v4.0</footer>
 
 <script>
   let visits = [];
-  let vehicles = {};
+  let contacts = [];
   let deleteId = null;
   let videoStream = null;
 
-  // ════════════════════ CARGAR DATOS ════════════════════
+  // ════════════════════ DATOS ════════════════════
   function loadData() {
-    const stored = localStorage.getItem('cd-visits');
-    if (stored) {
-      try {
-        visits = JSON.parse(stored);
-        generateVehicles();
-      } catch (e) {
-        console.error('Error loading:', e);
-      }
-    }
-  }
-
-  function generateVehicles() {
-    vehicles = {};
-    visits.forEach(v => {
-      const key = v.patente.toUpperCase();
-      if (!vehicles[key]) {
-        vehicles[key] = { conductor: v.conductor, rut: v.rut, destino: v.destino };
-      }
-    });
+    const v = localStorage.getItem('cd-visits');
+    const c = localStorage.getItem('cd-contacts');
+    if (v) visits = JSON.parse(v);
+    if (c) contacts = JSON.parse(c);
   }
 
   function saveData() {
     localStorage.setItem('cd-visits', JSON.stringify(visits));
-    generateVehicles();
+    localStorage.setItem('cd-contacts', JSON.stringify(contacts));
   }
 
-  // ════════════════════ FECHA Y HORA ════════════════════
   function setDateTime() {
     const now = new Date();
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const h = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('fecha').value = `${y}-${m}-${d}`;
-    document.getElementById('hora').value = `${h}:${min}`;
+    document.getElementById('fecha').value = now.toISOString().split('T')[0];
+    document.getElementById('hora').value = now.toTimeString().slice(0, 5);
   }
 
-  // ════════════════════ ALERTS ════════════════════
-  function showAlert(type, msg) {
-    const elem = document.getElementById('alert');
-    elem.className = `alert ${type}`;
-    elem.textContent = msg;
-    setTimeout(() => { elem.className = 'alert'; }, 4000);
+  // ════════════════════ TABS ════════════════════
+  function switchTab(event, tab) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+    event.target.classList.add('active');
+
+    if (tab === 'historial') renderHistorial();
+    if (tab === 'recurrentes') renderRecurrentes();
+    if (tab === 'pordia') renderPorDia();
+    if (tab === 'contactos') renderContacts();
   }
 
-  // ════════════════════ VALIDACIÓN ════════════════════
-  function validateForm() {
-    const patente = document.getElementById('patente').value.trim();
-    const conductor = document.getElementById('conductor').value.trim();
-    const fecha = document.getElementById('fecha').value.trim();
-    const hora = document.getElementById('hora').value.trim();
-
-    const inputs = ['patente', 'conductor', 'fecha', 'hora'];
-    let valid = true;
-
-    inputs.forEach(id => {
-      const el = document.getElementById(id);
-      if (!el.value.trim()) {
-        el.classList.add('error');
-        valid = false;
-      } else {
-        el.classList.remove('error');
-      }
-    });
-
-    return valid;
-  }
-
-  // ════════════════════ REGISTRAR VISITA ════════════════════
+  // ════════════════════ REGISTRO ════════════════════
   function registerVisit() {
-    if (!validateForm()) {
-      showAlert('error', 'Por favor completa: patente, conductor, fecha y hora');
+    const patente = document.getElementById('patente').value.trim().toUpperCase();
+    if (!patente) {
+      showAlert('error', 'Ingresa la patente');
       return;
     }
 
-    const rut = document.getElementById('rut').value.trim();
-
     visits.push({
       id: Date.now(),
-      patente: document.getElementById('patente').value.toUpperCase().trim(),
+      patente,
       conductor: document.getElementById('conductor').value.trim(),
-      rut: rut,
+      rut: document.getElementById('rut').value.trim(),
       destino: document.getElementById('destino').value.trim(),
       fecha: document.getElementById('fecha').value,
       hora: document.getElementById('hora').value
@@ -1026,65 +920,66 @@
 
     saveData();
     clearForm();
-    renderList();
     updateStats();
-    showAlert('success', '✓ Visita registrada correctamente');
+    showAlert('success', '✓ Visita registrada');
   }
 
   function clearForm() {
     ['patente', 'conductor', 'rut', 'destino'].forEach(id => {
       document.getElementById(id).value = '';
-      document.getElementById(id).classList.remove('error');
     });
     setDateTime();
-    closeDropdown();
+  }
+
+  function showAlert(type, msg) {
+    const alert = document.getElementById('alert') || document.getElementById('alert-contact');
+    alert.className = `alert ${type}`;
+    alert.textContent = msg;
+    setTimeout(() => { alert.className = 'alert'; }, 3000);
   }
 
   // ════════════════════ AUTOCOMPLETE ════════════════════
-  function closeDropdown() {
-    document.getElementById('dropdown').classList.remove('active');
-  }
-
   document.getElementById('patente').addEventListener('input', function() {
     const search = this.value.toUpperCase().trim();
     const dropdown = document.getElementById('dropdown');
 
     if (!search) {
-      closeDropdown();
+      dropdown.classList.remove('active');
       return;
     }
 
-    const matches = Object.entries(vehicles)
-      .filter(([p, d]) => p.includes(search) || d.conductor.toUpperCase().includes(search))
-      .slice(0, 5);
+    const matches = [...new Set(visits.map(v => v.patente))]
+      .filter(p => p.includes(search))
+      .slice(0, 5)
+      .map(p => visits.find(v => v.patente === p));
 
     if (matches.length === 0) {
-      closeDropdown();
+      dropdown.classList.remove('active');
       return;
     }
 
-    dropdown.innerHTML = matches.map(([plate, data], i) => `
-      <div class="dropdown-item" onclick="selectVehicle('${plate}')">
-        <div class="dropdown-plate">${plate}</div>
-        <div class="dropdown-name">${data.conductor}</div>
-        <div class="dropdown-rut">${data.rut || '(sin RUT)'}</div>
+    dropdown.innerHTML = matches.map(v => `
+      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.conductor}', '${v.rut}', '${v.destino}')">
+        <div class="dropdown-plate">${v.patente}</div>
+        <div class="dropdown-name">${v.conductor || 'Sin nombre'}</div>
       </div>
     `).join('');
 
     dropdown.classList.add('active');
   });
 
-  function selectVehicle(plate) {
-    const data = vehicles[plate];
-    document.getElementById('patente').value = plate;
-    document.getElementById('conductor').value = data.conductor;
-    document.getElementById('rut').value = data.rut || '';
-    document.getElementById('destino').value = data.destino || '';
-    closeDropdown();
+  function selectVehicle(patente, conductor, rut, destino) {
+    document.getElementById('patente').value = patente;
+    document.getElementById('conductor').value = conductor;
+    document.getElementById('rut').value = rut;
+    document.getElementById('destino').value = destino;
+    document.getElementById('dropdown').classList.remove('active');
   }
 
   document.addEventListener('click', e => {
-    if (!e.target.closest('.autocomplete-wrapper')) closeDropdown();
+    if (!e.target.closest('.autocomplete-wrapper')) {
+      document.getElementById('dropdown').classList.remove('active');
+    }
   });
 
   // ════════════════════ CÁMARA ════════════════════
@@ -1095,7 +990,7 @@
 
     try {
       videoStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
       });
       video.srcObject = videoStream;
     } catch (err) {
@@ -1105,16 +1000,11 @@
   }
 
   function closeCamera() {
-    const overlay = document.getElementById('camera-overlay');
-    const video = document.getElementById('video');
-    
     if (videoStream) {
       videoStream.getTracks().forEach(t => t.stop());
       videoStream = null;
     }
-    
-    video.srcObject = null;
-    overlay.classList.remove('active');
+    document.getElementById('camera-overlay').classList.remove('active');
   }
 
   async function capturePhoto() {
@@ -1125,31 +1015,25 @@
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0);
+    canvas.getContext('2d').drawImage(video, 0, 0);
 
     status.textContent = 'Procesando...';
     btn.disabled = true;
 
     try {
-      const { data: { text } } = await Tesseract.recognize(
-        canvas,
-        'spa',
-        { logger: m => console.log(m) }
-      );
-
+      const { data: { text } } = await Tesseract.recognize(canvas, 'spa');
       const plate = extractPlate(text);
-      
+
       if (plate) {
         document.getElementById('patente').value = plate;
-        showAlert('success', `✓ Detectado: ${plate}`);
+        showAlert('success', `Detectado: ${plate}`);
         closeCamera();
       } else {
         status.textContent = 'No se detectó placa. Intenta de nuevo.';
       }
     } catch (err) {
-      console.error('Error OCR:', err);
-      status.textContent = 'Error al procesar. Intenta de nuevo.';
+      console.error(err);
+      status.textContent = 'Error al procesar.';
     } finally {
       btn.disabled = false;
     }
@@ -1157,19 +1041,15 @@
 
   function extractPlate(text) {
     text = text.toUpperCase().trim();
-    
     const patterns = [
       /[A-Z]{2}-?\d{2}-?\d{2}/,
-      /[A-Z]{2}-?\d{3}-?\d{2}/,
       /[A-Z]{2}\d{2}[A-Z]{2}/,
       /\d{2}[A-Z]{2}\d{4}/
     ];
 
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        return match[0].replace(/[-\s]/g, '-').substring(0, 8);
-      }
+    for (const p of patterns) {
+      const match = text.match(p);
+      if (match) return match[0].replace(/[\s-]/g, '-').slice(0, 8);
     }
     return null;
   }
@@ -1186,201 +1066,284 @@
     document.getElementById('stat-week').textContent = visits.filter(v => v.fecha >= weekStr).length;
   }
 
-  // ════════════════════ RENDERIZAR LISTA ════════════════════
-  function renderList() {
-    const search = document.getElementById('search').value.toLowerCase().trim();
-    let filtered = visits;
+  // ════════════════════ HISTORIAL ════════════════════
+  function renderHistorial() {
+    const search = document.getElementById('search-historial').value.toLowerCase();
+    let filtered = visits.filter(v =>
+      v.patente.toLowerCase().includes(search) ||
+      v.conductor.toLowerCase().includes(search) ||
+      v.rut.toLowerCase().includes(search)
+    );
 
-    if (search) {
-      filtered = visits.filter(v =>
-        v.patente.toLowerCase().includes(search) ||
-        v.conductor.toLowerCase().includes(search) ||
-        v.rut.toLowerCase().includes(search)
-      );
-    }
+    document.getElementById('count-historial').textContent = filtered.length;
+    const list = document.getElementById('list-historial');
 
-    const listElem = document.getElementById('list');
-    const countElem = document.getElementById('list-count');
-    countElem.textContent = `${filtered.length}`;
-
-    if (filtered.length === 0) {
-      listElem.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p>Sin registros</p></div>';
+    if (!filtered.length) {
+      list.innerHTML = '<div class="empty">Sin registros</div>';
       return;
     }
 
-    listElem.innerHTML = filtered.map((v, i) => {
+    list.innerHTML = filtered.map((v, i) => {
       const [y, m, d] = v.fecha.split('-');
-      const num = visits.length - visits.indexOf(v);
-      const rutMissing = !v.rut ? '<span class="item-meta-missing">⚠ Falta RUT</span>' : '';
-
       return `
         <div class="list-item">
-          <div class="item-number">${num}</div>
+          <div class="item-number">${visits.length - visits.indexOf(v)}</div>
           <div class="item-info">
             <div class="item-plate">${v.patente}</div>
-            <div class="item-name">${v.conductor}</div>
-            <div class="item-meta">${v.rut || rutMissing} • ${v.destino}</div>
+            <div class="item-name">${v.conductor || 'Sin nombre'}</div>
+            <div class="item-meta">${v.rut || 'Sin RUT'} • ${v.destino}</div>
           </div>
-          <div class="item-time">
-            <div class="item-date">${d}/${m}/${y}</div>
-            <div class="item-hour">${v.hora}</div>
-            <button class="btn-delete" onclick="openDelete(${v.id})">✕</button>
+          <div class="item-actions">
+            <button class="btn-small btn-danger" onclick="deleteVisit(${v.id})">✕</button>
           </div>
-        </div>`;
+        </div>
+      `;
     }).join('');
   }
 
-  // ════════════════════ ELIMINAR ════════════════════
-  function openDelete(id) {
+  // ════════════════════ RECURRENTES ════════════════════
+  function renderRecurrentes() {
+    const vehículos = {};
+    visits.forEach(v => {
+      if (!vehículos[v.patente]) {
+        vehículos[v.patente] = { patente: v.patente, conductor: v.conductor, count: 0 };
+      }
+      vehículos[v.patente].count++;
+    });
+
+    const sorted = Object.values(vehículos).sort((a, b) => b.count - a.count);
+    document.getElementById('count-recurrentes').textContent = sorted.length;
+    const list = document.getElementById('list-recurrentes');
+
+    if (!sorted.length) {
+      list.innerHTML = '<div class="empty">Sin vehículos</div>';
+      return;
+    }
+
+    list.innerHTML = sorted.map(v => `
+      <div class="list-item">
+        <div class="item-number">${v.count}</div>
+        <div class="item-info">
+          <div class="item-plate">${v.patente}</div>
+          <div class="item-name">${v.conductor || 'Sin nombre'}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ════════════════════ POR DÍA ════════════════════
+  function renderPorDia() {
+    const porDía = {};
+    visits.forEach(v => {
+      if (!porDía[v.fecha]) porDía[v.fecha] = [];
+      porDía[v.fecha].push(v);
+    });
+
+    const sorted = Object.entries(porDía).sort((a, b) => new Date(b[0]) - new Date(a[0]));
+    document.getElementById('count-pordia').textContent = sorted.length;
+    const list = document.getElementById('list-pordia');
+
+    if (!sorted.length) {
+      list.innerHTML = '<div class="empty">Sin visitas</div>';
+      return;
+    }
+
+    list.innerHTML = sorted.map(([fecha, visitas]) => {
+      const [y, m, d] = fecha.split('-');
+      return `
+        <div class="list-item">
+          <div class="item-number">${visitas.length}</div>
+          <div class="item-info">
+            <div class="item-name"><strong>${d}/${m}/${y}</strong></div>
+            <div class="item-meta">${visitas.length} visita${visitas.length !== 1 ? 's' : ''}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ════════════════════ CONTACTOS ════════════════════
+  function addContact() {
+    const name = document.getElementById('contact-name').value.trim();
+    const rut = document.getElementById('contact-rut').value.trim();
+    const empresa = document.getElementById('contact-empresa').value.trim();
+
+    if (!name) {
+      showAlert('error', 'Ingresa el nombre');
+      return;
+    }
+
+    contacts.push({ id: Date.now(), name, rut, empresa });
+    saveData();
+
+    ['contact-name', 'contact-rut', 'contact-empresa'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+
+    showAlert('success', '✓ Contacto agregado');
+    renderContacts();
+  }
+
+  function renderContacts() {
+    document.getElementById('count-contacts').textContent = contacts.length;
+    const list = document.getElementById('list-contacts');
+
+    if (!contacts.length) {
+      list.innerHTML = '<div class="empty">Sin contactos</div>';
+      return;
+    }
+
+    list.innerHTML = contacts.map(c => `
+      <div class="contact-card">
+        <div class="contact-info">
+          <div class="contact-name">${c.name}</div>
+          <div class="contact-rut">${c.rut || 'Sin RUT'} • ${c.empresa || 'Sin empresa'}</div>
+        </div>
+        <div class="contact-actions">
+          <button class="btn-small" onclick="useContact('${c.name}', '${c.rut}')">Usar</button>
+          <button class="btn-small btn-danger" onclick="deleteContact(${c.id})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function useContact(name, rut) {
+    document.getElementById('conductor').value = name;
+    document.getElementById('rut').value = rut;
+    document.querySelector('[onclick*="switchTab"]').click();
+  }
+
+  function deleteContact(id) {
+    contacts = contacts.filter(c => c.id !== id);
+    saveData();
+    renderContacts();
+  }
+
+  // ════════════════════ EXPORTAR ════════════════════
+  function exportPDF() {
+    if (!visits.length) { showAlert('error', 'Sin datos'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const primary = [15, 23, 42], accent = [255, 107, 53];
+    const W = 210, M = 14, UW = W - M * 2;
+
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, W, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('Centro de Distribución', M, 15);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Registro de Visitas', M, 23);
+
+    let y = 40;
+    doc.setTextColor(...primary);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text('Historial de visitas', M, y);
+    y += 8;
+
+    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 22 }, { l: 'Conductor', w: 42 }, { l: 'RUT', w: 28 }, { l: 'Destino', w: 50 }, { l: 'Fecha', w: 20 }, { l: 'Hora', w: 14 }];
+
+    doc.setFillColor(...primary);
+    doc.rect(M, y, UW, 7, 'F');
+    let xc = M + 1;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    cols.forEach(c => { doc.text(c.l, xc, y + 4.5); xc += c.w; });
+    y += 7;
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...primary);
+
+    visits.forEach((v, idx) => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
+      doc.rect(M, y, UW, 6, 'F');
+
+      const [a, m2, d] = v.fecha.split('-');
+      const data = [String(idx + 1), v.patente, v.conductor.slice(0, 20), v.rut, v.destino.slice(0, 24), `${d}/${m2}/${a}`, v.hora];
+      xc = M + 1;
+      cols.forEach((c, ci) => {
+        doc.text(data[ci], xc, y + 4);
+        xc += c.w;
+      });
+      y += 6;
+    });
+
+    doc.save(`visitas_${new Date().toISOString().split('T')[0]}.pdf`);
+  }
+
+  function exportCSV() {
+    let csv = 'Patente,Conductor,RUT,Destino,Fecha,Hora\n';
+    visits.forEach(v => {
+      csv += `"${v.patente}","${v.conductor}","${v.rut}","${v.destino}","${v.fecha}","${v.hora}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `visitas_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  }
+
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(visits, null, 2)], { type: 'application/json' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `visitas_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+  }
+
+  function importData() {
+    document.getElementById('import-file').click();
+  }
+
+  function processImport() {
+    const file = document.getElementById('import-file').files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (Array.isArray(data)) {
+          visits = [...visits, ...data];
+          saveData();
+          updateStats();
+          showAlert('success', '✓ Datos importados');
+        }
+      } catch (err) {
+        showAlert('error', 'Error al importar');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function deleteVisit(id) {
     deleteId = id;
     document.getElementById('modal-delete').classList.add('active');
   }
 
-  function closeModal() {
-    deleteId = null;
-    document.getElementById('modal-delete').classList.remove('active');
-  }
-
   function confirmDelete() {
-    if (deleteId !== null) {
-      visits = visits.filter(v => v.id !== deleteId);
-      saveData();
-      renderList();
-      updateStats();
-      closeModal();
-    }
+    visits = visits.filter(v => v.id !== deleteId);
+    saveData();
+    updateStats();
+    renderHistorial();
+    closeModal();
   }
 
-  document.getElementById('modal-delete').addEventListener('click', e => {
-    if (e.target.id === 'modal-delete') closeModal();
-  });
-
-  document.getElementById('search').addEventListener('input', renderList);
-
-  // ════════════════════ PDF ════════════════════
-  function exportPDF() {
-    if (visits.length === 0) {
-      showAlert('error', 'No hay visitas para exportar');
-      return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-    const primary = [15, 23, 42];
-    const accent = [255, 107, 53];
-    const gray = [107, 114, 128];
-    const border = [229, 231, 235];
-
-    const W = 210, M = 14, UW = W - M * 2;
-
-    // Header
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, W, 40, 'F');
-
-    doc.setFillColor(...accent);
-    doc.roundedRect(M, 8, 20, 20, 3, 3, 'F');
-    doc.setFontSize(12);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.text('CD', M + 10, 20, { align: 'center' });
-
-    doc.setFontSize(16);
-    doc.text('Centro de Distribución', M + 25, 16);
-
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(200, 215, 240);
-    doc.text('Registro de visitas vehiculares', M + 25, 23);
-
-    const now = new Date();
-    doc.setFontSize(7.5);
-    doc.text(`${now.toLocaleDateString('es-CL')} ${now.toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'})}`, W - M, 23, { align: 'right' });
-
-    // Stats
-    let y = 50;
-    const sw = (UW - 8) / 3;
-    const today = new Date().toISOString().split('T')[0];
-
-    [{l: 'Total', v: visits.length}, {l: 'Hoy', v: visits.filter(x => x.fecha === today).length}, {l: 'Vehículos', v: Object.keys(vehicles).length}]
-      .forEach((s, i) => {
-        const x = M + i * (sw + 4);
-        doc.setFillColor(238, 243, 251);
-        doc.roundedRect(x, y, sw, 16, 2, 2, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(...primary);
-        doc.text(String(s.v), x + sw / 2, y + 9, { align: 'center' });
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(6.5);
-        doc.setTextColor(...gray);
-        doc.text(s.l.toUpperCase(), x + sw / 2, y + 13, { align: 'center' });
-      });
-
-    y += 22;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...primary);
-    doc.text('Historial de visitas', M, y);
-    y += 7;
-
-    const cols = [{l:'N°',w:8}, {l:'Patente',w:22}, {l:'Conductor',w:42}, {l:'RUT',w:30}, {l:'Destino',w:48}, {l:'Fecha',w:20}, {l:'Hora',w:14}];
-
-    const header = () => {
-      doc.setFillColor(...primary);
-      doc.rect(M, y, UW, 7, 'F');
-      let xc = M + 1.5;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(7);
-      doc.setTextColor(255, 255, 255);
-      cols.forEach(c => { doc.text(c.l, xc, y + 4.5); xc += c.w; });
-      y += 7;
-    };
-
-    header();
-
-    visits.forEach((v, idx) => {
-      if (y > 270) { doc.addPage(); y = 14; header(); }
-
-      doc.setFillColor(idx % 2 === 0 ? 255 : 247, idx % 2 === 0 ? 255 : 249, idx % 2 === 0 ? 255 : 254);
-      doc.rect(M, y, UW, 6.5, 'F');
-      doc.setDrawColor(...border);
-      doc.line(M, y + 6.5, M + UW, y + 6.5);
-
-      const [yr, mt, dy] = v.fecha.split('-');
-      const data = [String(visits.length - idx), v.patente, v.conductor.length > 22 ? v.conductor.substring(0, 20) + '…' : v.conductor, v.rut || '', v.destino.length > 26 ? v.destino.substring(0, 24) + '…' : v.destino, `${dy}/${mt}/${yr}`, v.hora];
-
-      let xc = M + 1.5;
-      cols.forEach((c, ci) => {
-        if (ci === 1) { doc.setFont('helvetica', 'bold'); doc.setTextColor(...accent); }
-        else { doc.setFont('helvetica', 'normal'); doc.setTextColor(...primary); }
-        doc.setFontSize(7);
-        doc.text(data[ci], xc, y + 4);
-        xc += c.w;
-      });
-
-      y += 6.5;
-    });
-
-    const pages = doc.getNumberOfPages();
-    for (let p = 1; p <= pages; p++) {
-      doc.setPage(p);
-      doc.setFillColor(238, 243, 251);
-      doc.rect(0, 285, 210, 12, 'F');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(...gray);
-      doc.text('Centro de Distribución — Registro de Visitas', M, 292);
-      doc.text(`Página ${p} de ${pages}`, W - M, 292, { align: 'right' });
-    }
-
-    doc.save(`visitas_${now.toISOString().split('T')[0]}.pdf`);
+  function closeModal() {
+    document.getElementById('modal-delete').classList.remove('active');
   }
 
   // ════════════════════ INIT ════════════════════
   loadData();
   setDateTime();
-  renderList();
   updateStats();
 </script>
 
