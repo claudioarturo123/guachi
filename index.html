@@ -1258,6 +1258,8 @@
     </div>
   </div>
 </div>
+
+<script>
   let visits = [];
   let contacts = [];
   let authenticated = false;
@@ -1309,6 +1311,12 @@
       authenticated = true;
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('app').style.display = '';
+      loadData();
+      setDateTime();
+      updateStats();
+      renderRecentToday();
+      updateStorageBar();
+      updateTimestamp('timestamp-registro');
     }
   }
 
