@@ -976,6 +976,20 @@
         </div>
 
         <div class="form-group">
+          <label>Tipo de vehículo</label>
+          <select id="tipo-vehiculo">
+            <option value="">— Seleccionar —</option>
+            <option value="Auto">🚗 Auto</option>
+            <option value="Camioneta">🛻 Camioneta</option>
+            <option value="Furgón">🚐 Furgón</option>
+            <option value="Camión">🚚 Camión</option>
+            <option value="Moto">🏍️ Moto</option>
+            <option value="Bus">🚌 Bus</option>
+            <option value="Otro">🚙 Otro</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label>Conductor *</label>
           <input type="text" id="conductor" placeholder="Nombre completo" autocomplete="off">
         </div>
@@ -1168,12 +1182,14 @@
 
     <div class="card">
       <div class="card-header">
-        <div class="card-icon">📄</div>
-        <div class="card-title">Exportar visitas</div>
+        <div class="card-icon">🌙</div>
+        <div class="card-title">Reporte Turno Noche</div>
       </div>
-
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <button class="btn-secondary" onclick="exportPDFDaily()">📊 PDF - Visitas de hoy</button>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">
+        Incluye visitas entre las <strong>20:00</strong> de ayer y las <strong>08:00</strong> de hoy.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-secondary" onclick="exportPDFTurnoNoche()">🌙 PDF - Turno noche</button>
         <button class="btn-secondary" onclick="exportPDF()">📄 PDF - Reporte completo</button>
       </div>
     </div>
@@ -1181,9 +1197,8 @@
     <div class="card">
       <div class="card-header">
         <div class="card-icon">📅</div>
-        <div class="card-title">Exportar por rango</div>
+        <div class="card-title">Exportar por rango de fechas</div>
       </div>
-
       <div class="form-grid">
         <div class="form-group">
           <label>Desde</label>
@@ -1194,7 +1209,6 @@
           <input type="date" id="fecha-hasta">
         </div>
       </div>
-
       <button class="btn-secondary" onclick="exportPDFRange()">📑 Exportar rango</button>
     </div>
 
@@ -1203,18 +1217,15 @@
         <div class="card-icon">💬</div>
         <div class="card-title">WhatsApp</div>
       </div>
-
       <div class="form-grid">
         <div class="form-group full">
-          <label>Número WhatsApp</label>
+          <label>Número WhatsApp (con código de país)</label>
           <input type="text" id="whatsapp-number" placeholder="56975123456">
         </div>
       </div>
-
-      <button class="btn-primary" onclick="saveWhatsappNumber()">💾 Guardar</button>
-
-      <div style="margin-top: 16px;">
-        <button class="btn-secondary" onclick="sendWhatsappDaily()">💬 Enviar visitas de hoy</button>
+      <button class="btn-primary" onclick="saveWhatsappNumber()">💾 Guardar número</button>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <button class="btn-secondary" onclick="sendWhatsappTurnoNoche()">🌙 Enviar resumen Turno Noche por WhatsApp</button>
       </div>
     </div>
   </section>
@@ -1332,45 +1343,36 @@
   // ════════════════════ GOOGLE SHEETS API ════════════════════
   const GS_URL = 'https://script.google.com/macros/s/AKfycbwUK1sqUbxtMG_J87oJsQSJelOUk2iGj_9mgFyjjukkMO4EoTUL_pycW0i3WsQBfanIMg/exec';
 
-  // Indicador de estado de conexión
   function setConexionStatus(estado) {
-    // 'online' | 'offline' | 'syncing'
     const el = document.getElementById('conexion-status');
     if (!el) return;
     if (estado === 'online')  { el.textContent = '🟢 Sincronizado con Google Sheets'; el.style.color = '#10a37f'; }
-    if (estado === 'offline') { el.textContent = '🔴 Sin conexión — guardado local'; el.style.color = '#f59e0b'; }
-    if (estado === 'syncing') { el.textContent = '🔄 Sincronizando...'; el.style.color = '#60a5fa'; }
+    if (estado === 'offline') { el.textContent = '🟡 Sin conexión — datos guardados localmente'; el.style.color = '#f59e0b'; }
+    if (estado === 'syncing') { el.textContent = '🔄 Sincronizando con Google Sheets...'; el.style.color = '#60a5fa'; }
   }
 
-  // Guardar en localStorage Y enviar a Google Sheets
-  function saveData() {
-    localStorage.setItem('cd-visits', JSON.stringify(visits));
-    localStorage.setItem('cd-contacts', JSON.stringify(contacts));
-    localStorage.setItem('cd-updated', new Date().toISOString());
-  }
-
-  // Enviar una visita nueva a Sheets
+  // Enviar via URLSearchParams (compatible con Apps Script doPost + e.parameter)
   async function pushVisitToSheets(visit) {
     setConexionStatus('syncing');
     try {
-      // Usamos un form-data encoded que sí pasa con no-cors
-      const form = new FormData();
-      form.append('action', 'insert');
-      form.append('id', String(visit.id));
-      form.append('patente', visit.patente || '');
-      form.append('conductor', visit.conductor || '');
-      form.append('rut', visit.rut || '');
-      form.append('destino', visit.destino || '');
-      form.append('fecha', visit.fecha || '');
-      form.append('hora', visit.hora || '');
-      form.append('notas', visit.notas || '');
-
+      const params = new URLSearchParams({
+        action: 'insert',
+        id: String(visit.id),
+        patente: visit.patente || '',
+        tipo: visit.tipo || '',
+        conductor: visit.conductor || '',
+        rut: visit.rut || '',
+        destino: visit.destino || '',
+        fecha: visit.fecha || '',
+        hora: visit.hora || '',
+        notas: visit.notas || ''
+      });
       await fetch(GS_URL, {
         method: 'POST',
         mode: 'no-cors',
-        body: form
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
       });
-
       visit._synced = true;
       saveData();
       setConexionStatus('online');
@@ -1381,91 +1383,99 @@
     }
   }
 
-  // Eliminar de Sheets
   async function deleteFromSheets(id) {
     try {
-      const form = new FormData();
-      form.append('action', 'delete');
-      form.append('id', String(id));
+      const params = new URLSearchParams({ action: 'delete', id: String(id) });
       await fetch(GS_URL, {
         method: 'POST',
         mode: 'no-cors',
-        body: form
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
       });
     } catch(e) {}
   }
 
-  // Sincronizar visitas pendientes
   async function syncPendientes() {
     const pendientes = visits.filter(v => !v._synced);
     if (!pendientes.length) { setConexionStatus('online'); return; }
     setConexionStatus('syncing');
     for (const v of pendientes) {
       try {
-        const form = new FormData();
-        form.append('action', 'insert');
-        form.append('id', String(v.id));
-        form.append('patente', v.patente || '');
-        form.append('conductor', v.conductor || '');
-        form.append('rut', v.rut || '');
-        form.append('destino', v.destino || '');
-        form.append('fecha', v.fecha || '');
-        form.append('hora', v.hora || '');
-        form.append('notas', v.notas || '');
-        await fetch(GS_URL, { method: 'POST', mode: 'no-cors', body: form });
+        const params = new URLSearchParams({
+          action: 'insert',
+          id: String(v.id),
+          patente: v.patente || '',
+          conductor: v.conductor || '',
+          rut: v.rut || '',
+          destino: v.destino || '',
+          fecha: v.fecha || '',
+          hora: v.hora || '',
+          notas: v.notas || ''
+        });
+        await fetch(GS_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        });
         v._synced = true;
       } catch(e) { break; }
     }
     saveData();
-    const aun = visits.filter(v => !v._synced).length;
-    setConexionStatus(aun === 0 ? 'online' : 'offline');
+    setConexionStatus(visits.filter(v => !v._synced).length === 0 ? 'online' : 'offline');
   }
 
-  // Cargar datos desde Sheets al iniciar (para sincronizar entre dispositivos)
+  // Al iniciar: cargar local primero, luego bajar de Sheets
   async function loadDataFromSheets() {
     try {
       setConexionStatus('syncing');
-      const resp = await fetch(GS_URL + '?action=getAll');
+      const resp = await fetch(GS_URL, { method: 'GET' });
       const json = await resp.json();
-      if (json.ok && json.data && json.data.length > 0) {
-        // Convertir filas de Sheets al formato de la app
+      if (json.ok && Array.isArray(json.data) && json.data.length > 0) {
         const sheetsVisits = json.data
-          .filter(row => row.ID || row.id)
+          .filter(row => row.ID)
           .map(row => ({
-            id: Number(row.ID || row.id),
-            patente: row.PATENTE || row.patente || '',
-            conductor: row.CONDUCTOR || row.conductor || '',
-            rut: row.RUT || row.rut || '',
-            destino: row.DESTINO || row.destino || '',
-            fecha: row.FECHA || row.fecha || '',
-            hora: row.HORA || row.hora || '',
-            notas: row.NOTAS || row.notas || '',
+            id: Number(row.ID),
+            patente: row.PATENTE || '',
+            conductor: row.CONDUCTOR || '',
+            rut: row.RUT || '',
+            destino: row.DESTINO || '',
+            fecha: String(row.FECHA || ''),
+            hora: String(row.HORA || ''),
+            notas: row.NOTAS || '',
             _synced: true
           }));
-        // Fusionar: mantener local y agregar los que vienen de Sheets
         const localIds = new Set(visits.map(v => v.id));
         const nuevos = sheetsVisits.filter(v => !localIds.has(v.id));
-        visits = [...visits, ...nuevos].sort((a, b) => b.id - a.id);
-        saveData();
-        updateStats();
-        renderRecentToday();
+        if (nuevos.length > 0) {
+          visits = [...visits, ...nuevos].sort((a, b) => b.id - a.id);
+          saveData();
+          updateStats();
+          renderRecentToday();
+        }
         setConexionStatus('online');
+        // Sincronizar pendientes locales
+        await syncPendientes();
       } else {
         setConexionStatus('online');
+        await syncPendientes();
       }
     } catch(e) {
       setConexionStatus('offline');
-      // Sin internet — usar datos locales
     }
   }
 
-  // Cargar datos: primero local (instantáneo), luego sincronizar con Sheets
+  function saveData() {
+    localStorage.setItem('cd-visits', JSON.stringify(visits));
+    localStorage.setItem('cd-contacts', JSON.stringify(contacts));
+    localStorage.setItem('cd-updated', new Date().toISOString());
+  }
+
   function loadData() {
     const v = localStorage.getItem('cd-visits');
     const c = localStorage.getItem('cd-contacts');
     if (v) visits = JSON.parse(v);
     if (c) contacts = JSON.parse(c);
-    // Sincronizar con Sheets en segundo plano
     setTimeout(loadDataFromSheets, 800);
   }
 
@@ -1559,21 +1569,22 @@
     }
 
     dropdown.innerHTML = matches.map(v => `
-      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}')">
+      <div class="dropdown-item" onclick="selectVehicle('${v.patente}', '${v.conductor}', '${v.rut}', '${v.destino}', '${v.notas}', '${v.tipo||''}')">
         <div class="dropdown-plate">${v.patente}</div>
-        <div class="dropdown-name">${v.conductor || 'Sin nombre'}</div>
+        <div class="dropdown-name">${v.conductor || 'Sin nombre'}${v.tipo ? ' · '+v.tipo : ''}</div>
       </div>
     `).join('');
 
     dropdown.classList.add('active');
   });
 
-  function selectVehicle(patente, conductor, rut, destino, notas) {
+  function selectVehicle(patente, conductor, rut, destino, notas, tipo) {
     document.getElementById('patente').value = patente;
     document.getElementById('conductor').value = conductor;
     document.getElementById('rut').value = rut;
     document.getElementById('destino').value = destino;
     document.getElementById('notas').value = notas || '';
+    if (tipo) document.getElementById('tipo-vehiculo').value = tipo;
     updateCharCount();
     document.getElementById('dropdown').classList.remove('active');
   }
@@ -1601,6 +1612,7 @@
     const nuevaVisita = {
       id: Date.now(),
       patente,
+      tipo: document.getElementById('tipo-vehiculo').value || 'No especificado',
       conductor,
       rut: document.getElementById('rut').value.trim(),
       destino,
@@ -1627,6 +1639,7 @@
     ['patente', 'conductor', 'rut', 'destino', 'notas'].forEach(id => {
       document.getElementById(id).value = '';
     });
+    document.getElementById('tipo-vehiculo').value = '';
     updateCharCount();
     setDateTime();
   }
@@ -1804,7 +1817,7 @@
         <div class="list-item">
           <div class="item-number">${visits.length - visits.indexOf(v)}</div>
           <div class="item-info">
-            <div class="item-plate">${v.patente}</div>
+            <div class="item-plate">${v.patente}${v.tipo ? ` <span style="font-size:10px;font-weight:400;color:var(--text-secondary);letter-spacing:0">${v.tipo}</span>` : ''}</div>
             <div class="item-name">${v.conductor || 'Sin nombre'}</div>
             <div class="item-meta">${v.rut || 'Sin RUT'} • ${v.destino}</div>
             ${v.notas ? `<div class="item-meta">📝 ${v.notas}</div>` : ''}
@@ -1909,118 +1922,176 @@
   }
 
   // ════════════════════ EXPORTAR ════════════════════
-  function exportPDFDaily() {
-    const today = new Date().toISOString().split('T')[0];
-    const hoyVisitas = visits.filter(v => v.fecha === today);
 
-    if (!hoyVisitas.length) {
-      showAlert('error', 'Sin visitas para hoy');
+  // Obtiene visitas del turno noche: 20:00 de ayer → 08:00 de hoy
+  function getVisitasTurnoNoche() {
+    const ahora = new Date();
+    const hoy = ahora.toISOString().split('T')[0];
+    const ayer = new Date(ahora); ayer.setDate(ahora.getDate() - 1);
+    const ayerStr = ayer.toISOString().split('T')[0];
+
+    return visits.filter(v => {
+      const hora = v.hora || '00:00';
+      const [h] = hora.split(':').map(Number);
+      // Ayer entre 20:00 y 23:59
+      if (v.fecha === ayerStr && h >= 20) return true;
+      // Hoy entre 00:00 y 07:59
+      if (v.fecha === hoy && h < 8) return true;
+      return false;
+    }).sort((a, b) => {
+      const fa = a.fecha + a.hora, fb = b.fecha + b.hora;
+      return fa.localeCompare(fb);
+    });
+  }
+
+  function exportPDFTurnoNoche() {
+    const visitas = getVisitasTurnoNoche();
+    if (!visitas.length) {
+      showAlert('error', 'Sin visitas en el turno noche (20:00 - 08:00)');
       return;
     }
-
-    generatePDF(hoyVisitas, today);
+    const ahora = new Date();
+    const ayer = new Date(ahora); ayer.setDate(ahora.getDate() - 1);
+    const ayerStr = ayer.toISOString().split('T')[0];
+    generatePDF(visitas, 'turno_noche', `Turno Noche: ${formatFecha(ayerStr)} 20:00 → ${formatFecha(ahora.toISOString().split('T')[0])} 08:00`);
   }
 
   function exportPDF() {
-    if (!visits.length) {
-      showAlert('error', 'Sin datos');
-      return;
-    }
-    generatePDF(visits, 'completo');
+    if (!visits.length) { showAlert('error', 'Sin datos para exportar'); return; }
+    generatePDF(visits, 'completo', 'Reporte Completo de Visitas');
   }
 
   function exportPDFRange() {
     const desde = document.getElementById('fecha-desde').value;
     const hasta = document.getElementById('fecha-hasta').value;
-
-    if (!desde || !hasta) {
-      showAlert('error', 'Ingresa ambas fechas');
-      return;
-    }
-
-    const filtered = visits.filter(v => v.fecha >= desde && v.fecha <= hasta);
-
-    if (!filtered.length) {
-      showAlert('error', 'Sin visitas en este rango');
-      return;
-    }
-
-    generatePDF(filtered, `${desde}_${hasta}`);
+    if (!desde || !hasta) { showAlert('error', 'Ingresa ambas fechas'); return; }
+    const filtered = visits.filter(v => v.fecha >= desde && v.fecha <= hasta)
+                           .sort((a,b) => (a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+    if (!filtered.length) { showAlert('error', 'Sin visitas en este rango de fechas'); return; }
+    generatePDF(filtered, 'rango', `Visitas: ${formatFecha(desde)} → ${formatFecha(hasta)}`);
   }
 
-  function generatePDF(data, type) {
+  function formatFecha(f) {
+    if (!f) return '';
+    const [y, m, d] = f.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function generatePDF(data, tipo, tituloExtra) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const primary = [10, 14, 39], accent = [255, 107, 53];
+    const azul = [25, 25, 25], naranja = [255, 107, 53];
     const W = 210, M = 14, UW = W - M * 2;
 
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, W, 30, 'F');
+    // Header
+    doc.setFillColor(...naranja);
+    doc.rect(0, 0, W, 32, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.text('Alacran Technologies', M, 15);
-    
-    let title = 'Registro de Visitas';
-    if (type !== 'completo' && !type.includes('_')) {
-      const [y, m, d] = type.split('-');
-      title = `Visitas del ${d}/${m}/${y}`;
-    } else if (type.includes('_')) {
-      const [desde, hasta] = type.split('_');
-      const [y1, m1, d1] = desde.split('-');
-      const [y2, m2, d2] = hasta.split('-');
-      title = `Visitas: ${d1}/${m1}/${y1} - ${d2}/${m2}/${y2}`;
-    }
-    
-    doc.setFontSize(10);
+    doc.setFontSize(16);
+    doc.text('Alacran Technologies', M, 13);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
-    doc.text(title, M, 23);
+    doc.text('Registro de Visitas Vehiculares', M, 20);
+    doc.setFontSize(8);
+    doc.text(tituloExtra || '', M, 27);
 
+    // Fecha generación
+    const ahora = new Date();
+    doc.setFontSize(7);
+    doc.text(`Generado: ${ahora.toLocaleDateString('es-CL')} ${ahora.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})}`, W - M, 27, { align: 'right' });
+
+    // Resumen
     let y = 40;
-    doc.setTextColor(...primary);
+    doc.setFillColor(240, 240, 240);
+    doc.rect(M, y, UW, 8, 'F');
+    doc.setTextColor(...azul);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(`Total: ${data.length} visitas | Usuario: ${DEFAULT_USER}`, M, y);
-    y += 10;
+    doc.setFontSize(8);
+    doc.text(`Total: ${data.length} visita${data.length !== 1 ? 's' : ''}  |  Operador: ${DEFAULT_USER}`, M + 2, y + 5.5);
+    y += 14;
 
-    const cols = [{ l: 'N°', w: 8 }, { l: 'Patente', w: 22 }, { l: 'Conductor', w: 35 }, { l: 'RUT', w: 25 }, { l: 'Destino', w: 45 }, { l: 'Hora', w: 14 }, { l: 'Notas', w: 36 }];
+    // Cabecera tabla
+    const cols = [
+      { l: 'N°', w: 8 },
+      { l: 'Patente', w: 22 },
+      { l: 'Conductor', w: 38 },
+      { l: 'RUT', w: 26 },
+      { l: 'Destino', w: 42 },
+      { l: 'Fecha', w: 20 },
+      { l: 'Hora', w: 12 },
+      { l: 'Notas', w: 18 }
+    ];
 
-    doc.setFillColor(...primary);
+    doc.setFillColor(...azul);
     doc.rect(M, y, UW, 7, 'F');
     let xc = M + 1;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(7);
     doc.setTextColor(255, 255, 255);
-    cols.forEach(c => { doc.text(c.l, xc, y + 4.5); xc += c.w; });
+    cols.forEach(c => { doc.text(c.l, xc, y + 4.8); xc += c.w; });
     y += 7;
 
+    // Filas
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7);
-    doc.setTextColor(...primary);
 
     data.forEach((v, idx) => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      doc.setFillColor(idx % 2 === 0 ? 255 : 250, idx % 2 === 0 ? 255 : 252, 255);
-      doc.rect(M, y, UW, 6, 'F');
+      if (y > 272) {
+        doc.addPage();
+        y = 16;
+        // repetir cabecera
+        doc.setFillColor(...azul);
+        doc.rect(M, y, UW, 7, 'F');
+        xc = M + 1;
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(255, 255, 255);
+        cols.forEach(c => { doc.text(c.l, xc, y + 4.8); xc += c.w; });
+        y += 7;
+        doc.setFont('helvetica', 'normal');
+      }
 
-      const rowData = [String(idx + 1), v.patente, v.conductor.slice(0, 18), v.rut, v.destino.slice(0, 20), v.hora, v.notas.slice(0, 15)];
+      const par = idx % 2 === 0;
+      doc.setFillColor(par ? 255 : 245, par ? 255 : 245, par ? 255 : 245);
+      doc.rect(M, y, UW, 6, 'F');
+      doc.setTextColor(...azul);
+
+      const notas = (v.notas || '').slice(0, 12);
+      const rowData = [
+        String(idx + 1),
+        v.patente || '',
+        (v.conductor || '').slice(0, 20),
+        (v.rut || '').slice(0, 14),
+        (v.destino || '').slice(0, 22),
+        formatFecha(v.fecha),
+        v.hora || '',
+        notas
+      ];
+
       xc = M + 1;
       cols.forEach((c, ci) => {
+        if (ci === 1) { doc.setFont('helvetica', 'bold'); doc.setTextColor(...naranja); }
+        else { doc.setFont('helvetica', 'normal'); doc.setTextColor(...azul); }
         doc.text(rowData[ci], xc, y + 4);
         xc += c.w;
       });
       y += 6;
     });
 
-    let filename;
-    if (type === 'completo') {
-      filename = 'visitas_completo.pdf';
-    } else if (type.includes('_')) {
-      filename = `visitas_${type}.pdf`;
-    } else {
-      filename = `visitas_${type}.pdf`;
+    // Footer
+    const pags = doc.getNumberOfPages();
+    for (let p = 1; p <= pags; p++) {
+      doc.setPage(p);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(0, 285, 210, 12, 'F');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Alacran Technologies — Documento generado automáticamente', M, 292);
+      doc.text(`Página ${p} de ${pags}`, W - M, 292, { align: 'right' });
     }
-    
+
+    const filename = `alacran_${tipo}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
   }
 
@@ -2033,38 +2104,32 @@
     }
   }
 
-  function sendWhatsappDaily() {
+  function sendWhatsappTurnoNoche() {
     const number = localStorage.getItem('cd-whatsapp');
-    if (!number) {
-      showAlert('error', 'Configura el número WhatsApp');
-      return;
-    }
+    if (!number) { showAlert('error', 'Configura el número WhatsApp primero'); return; }
 
-    const today = new Date().toISOString().split('T')[0];
-    const hoyVisitas = visits.filter(v => v.fecha === today);
+    const visitas = getVisitasTurnoNoche();
+    if (!visitas.length) { showAlert('error', 'Sin visitas en el turno noche (20:00 - 08:00)'); return; }
 
-    if (!hoyVisitas.length) {
-      showAlert('error', 'Sin visitas para hoy');
-      return;
-    }
+    const ahora = new Date();
+    const ayer = new Date(ahora); ayer.setDate(ahora.getDate() - 1);
 
-    const [y, m, d] = today.split('-');
-    const fechaDisplay = `${d}/${m}/${y}`;
+    let msg = `🦂 *Alacran Technologies*%0A`;
+    msg += `🌙 *Reporte Turno Noche*%0A`;
+    msg += `📅 ${formatFecha(ayer.toISOString().split('T')[0])} 20:00 → ${formatFecha(ahora.toISOString().split('T')[0])} 08:00%0A`;
+    msg += `Total: *${visitas.length} vehículo${visitas.length !== 1 ? 's' : ''}*%0A%0A`;
 
-    let mensaje = `Visitas acumuladas del ${fechaDisplay}:%0A%0ATotal: ${hoyVisitas.length} vehículos%0A%0A`;
-    hoyVisitas.forEach((v, i) => {
-      mensaje += `${i + 1}. ${v.patente} - ${v.conductor || 'S/N'} (${v.hora})`;
-      if (v.notas) mensaje += ` - ${v.notas}`;
-      mensaje += '%0A';
+    visitas.forEach((v, i) => {
+      msg += `${i + 1}. 🚗 *${v.patente}* — ${v.conductor || 'S/N'} (${v.hora})`;
+      if (v.destino) msg += `%0A   📍 ${v.destino}`;
+      if (v.notas) msg += `%0A   📝 ${v.notas}`;
+      msg += '%0A%0A';
     });
-    mensaje += '%0A📎 Ver PDF adjunto para más detalles.';
+    msg += `_Generado automáticamente por Alacran Technologies_`;
 
-    const whatsappURL = `https://wa.me/${number}?text=${mensaje}`;
-    window.open(whatsappURL, '_blank');
-
-    setTimeout(() => {
-      exportPDFDaily();
-    }, 500);
+    window.open(`https://wa.me/${number}?text=${msg}`, '_blank');
+    // También exporta el PDF del turno
+    setTimeout(() => exportPDFTurnoNoche(), 600);
   }
 
   function deleteVisit(id) {
